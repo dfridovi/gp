@@ -1,0 +1,67 @@
+# SSH authorization so that travis can push documentation to the repository.
+env:
+  global:
+    secure:
+
+language: cpp
+
+compiler:
+  - gcc
+  #- clang
+
+os:
+  - linux
+
+branches:
+  only:
+    - master
+
+notifications:
+  email: false
+
+install:
+  - echo $TRAVIS_OS_NAME
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y ppa:tuleu/precise-backports; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get update -qq; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install --yes build-essential
+    doxygen libgflags-dev libgoogle-glog-dev mercurial cmake libatlas-base-dev; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install python-software-properties; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install gcc-4.8 g++-4.8; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 20; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 20; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo update-alternatives --config gcc; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo update-alternatives --config g++; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install freeglut3 freeglut3-dev; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install binutils-gold; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libxmu-dev libxi-dev; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libboost-all-dev; fi
+
+before_script:
+  # Get Eigen. The apt-get version on 12.04 is too old; we need at least 3.1.0.
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then mkdir eigen && cd eigen; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then hg clone https://bitbucket.org/eigen/eigen; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cd eigen && hg update 3.2; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then mkdir build && cd build; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cmake -DCMAKE_BUILD_TYPE=Release ..; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then make -j4; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo make install; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cd ../../..; fi
+
+  # Configure and make GP.
+  - mkdir bin
+  - mkdir build
+  - cd build
+  - cmake ..
+
+script:
+  - make -j4
+  - ./run_tests
+
+#after_success:
+  # Make and publish documentation.
+#  - git config credential.helper "store --file=.git/credentials"
+#  - echo "https://${PA_TOKEN}:@github.com" > .git/credentials
+#  - make documentation
+#  - cd ..
+#  - ./documentation/publish_documentation.sh

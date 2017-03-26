@@ -1,0 +1,36 @@
+# C++ build and binaries.
+build/
+bin/
+data/
+
+# Figures.
+*/figures/
+*.eps
+*.jpg
+
+# Compiled object files
+*.slo
+*.lo
+*.o
+
+# Compiled dynamic and static libraries
+*.so
+*.dylib
+*.la
+*.a
+
+# Glog log files
+*.log*
+*.INFO
+
+# OSX dir files
+.DS_store
+
+# Saved data.
+*.csv
+
+# Emacs backups.
+*~
+
+# C extensions
+*.so
