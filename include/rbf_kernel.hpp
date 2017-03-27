@@ -51,13 +51,15 @@ namespace gp {
 
   class RbfKernel : public Kernel {
   public:
-    ~RbfKernel() {}
-    explicit RbfKernel(const VectorXd& lengths);
+    // Factory method.
+    static Kernel::Ptr Create(const VectorXd& lengths);
 
     // Pure virtual methods to be implemented in a derived class.
-    double operator()(const VectorXd& x, const VectorXd& y) const;
+    double Evaluate(const VectorXd& x, const VectorXd& y) const;
 
   private:
+    explicit RbfKernel(const VectorXd& lengths);
+
     // Length scales.
     VectorXd lengths_;
   }; //\class RbfKernel

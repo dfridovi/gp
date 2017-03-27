@@ -47,14 +47,21 @@
 
 #include "types.hpp"
 
+#include <memory>
+
 namespace gp {
 
   class Kernel {
   public:
+    // Typedefs.
+    typedef std::shared_ptr<Kernel> Ptr;
+    typedef std::shared_ptr<const Kernel> ConstPtr;
+
+    // Destructor.
     virtual ~Kernel() {}
 
     // Pure virtual methods to be implemented in a derived class.
-    double operator()(const VectorXd& x, const VectorXd& y) const;
+    virtual double Evaluate(const VectorXd& x, const VectorXd& y) const;
 
   protected:
     explicit Kernel() {}

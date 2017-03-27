@@ -36,34 +36,68 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Defines the RbfKernel class, which is derived from the Kernel base class.
-// The RBF kernel is a function k(x, y) = exp(-0.5 (x-y)^T inv(L) (x-y)), where
-// x, y are points in R^n and L is a diagonal matrix of squared length scales.
+// Defines the GaussianProcess class.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <rbf_kernel.hpp>
+#ifndef GP_GAUSSIAN_PROCESS_H
+#define GP_GAUSSIAN_PROCESS_H
 
-#include <math.h>
+#include "kernel.hpp"
+#include "types.hpp"
+
+#include <Eigen/Cholesky>
+#include <glog/logging.h>
+#include <vector>
 
 namespace gp {
 
-  // Factory method.
-  Kernel::Ptr RbfKernel::Create(const VectorXd& lengths) {
-    Kernel::Ptr ptr(new RbfKernel(lengths));
-    return ptr;
-  }
+  class GaussianProcess {
+  public:
+    ~GaussianProcess() {}
 
-  // Constructor.
-  RbfKernel::RbfKernel(const VectorXd& lengths)
-    : Kernel(),
-      lengths_(lengths) {}
+    // Constructors. By default picks 10% of the maximum number of points
+    // randomly within the unit box [-1, 1]^d.
+    explicit GaussianProcess(const Kernel::Ptr& kernel,
+                             size_t dimension, size_t max_points = 100);
+    explicit GaussianProcess(const Kernel::Ptr& kernel,
+                             const std::vector<VectorXd>& points,
+                             size_t dimension, size_t max_points = 100);
+    explicit GaussianProcess(const Kernel::Ptr& kernel,
+                             const std::vector<VectorXd>& points,
+                             const VectorXd& targets,
+                             size_t dimension, size_t max_points = 100);
 
-  // Pure virtual methods to be implemented in a derived class.
-  double RbfKernel::Evaluate(const VectorXd& x, const VectorXd& y) const {
-    const VectorXd diff = x - y;
+    // Evaluate mean and variance at a point.
+    void Evaluate(const VectorXd& x, double& mean, double& variance) const;
 
-    return std::exp(-0.5 * diff.cwiseQuotient(lengths_).squaredNorm());
-  }
+    // Learn kernel hyperparameters.
+    bool LearnHyperparams();
+
+  private:
+    // Compute the covariance and cross covariance against the training points.
+    void Covariance();
+    void CrossCovariance(const VectorXd& x, VectorXd& cross) const;
+
+    // Kernel.
+    const Kernel::Ptr kernel_;
+
+    // Dimension.
+    const size_t dimension_;
+
+    // Training points, targets, and regressed targets (inv(cov) * targets).
+    std::vector<VectorXd> points_;
+    VectorXd targets_;
+    VectorXd regressed_;
+
+    // Maximum number of points.
+    const size_t max_points_;
+
+    // Covariance matrix, with Cholesky decomposition.
+    MatrixXd covariance_;
+    Eigen::LLT<MatrixXd> llt_;
+  }; //\class GaussianProcess
 
 }  //\namespace gp
+
+#endif
