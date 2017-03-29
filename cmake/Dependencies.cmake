@@ -17,3 +17,8 @@ list(APPEND gp_LIBRARIES ${GFLAGS_LIBRARIES})
 include("cmake/Modules/FindGlog.cmake")
 include_directories(SYSTEM ${GLOG_INCLUDE_DIRS})
 list(APPEND gp_LIBRARIES ${GLOG_LIBRARIES})
+
+# Find Google Ceres.
+include("cmake/Modules/FindCeres.cmake")
+include_directories(SYSTEM ${CERES_INCLUDE_DIRS})
+list(APPEND gp_LIBRARIES ${CERES_LIBRARIES})

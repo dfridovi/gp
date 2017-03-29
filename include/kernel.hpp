@@ -63,8 +63,19 @@ namespace gp {
     // Pure virtual methods to be implemented in a derived class.
     virtual double Evaluate(const VectorXd& x, const VectorXd& y) const;
 
+    // Access and reset params.
+    const VectorXd& Params() const { return params_; }
+    void Reset(const VectorXd& params) {
+      CHECK_EQ(params_.size(), params.size());
+      params_ = params;
+    }
+
   protected:
-    explicit Kernel() {}
+    explicit Kernel(const VectorXd& params)
+      : params_(params) {}
+
+    // Parameter vector.
+    VectorXd params_;
   }; //\class Kernel
 
 }  //\namespace gp

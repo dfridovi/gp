@@ -33,7 +33,6 @@
  * Please contact the author(s) of this library if you have any questions.
  * Authors: David Fridovich-Keil   ( dfk@eecs.berkeley.edu )
  */
-
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Defines the RbfKernel class, which is derived from the Kernel base class.
@@ -56,14 +55,13 @@ namespace gp {
 
   // Constructor.
   RbfKernel::RbfKernel(const VectorXd& lengths)
-    : Kernel(),
-      lengths_(lengths) {}
+    : Kernel(lengths) {}
 
   // Pure virtual methods to be implemented in a derived class.
   double RbfKernel::Evaluate(const VectorXd& x, const VectorXd& y) const {
     const VectorXd diff = x - y;
 
-    return std::exp(-0.5 * diff.cwiseQuotient(lengths_).squaredNorm());
+    return std::exp(-0.5 * diff.cwiseQuotient(params_).squaredNorm());
   }
 
 }  //\namespace gp

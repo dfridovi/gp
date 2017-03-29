@@ -71,7 +71,8 @@ namespace gp {
     // Evaluate mean and variance at a point.
     void Evaluate(const VectorXd& x, double& mean, double& variance) const;
 
-    // Learn kernel hyperparameters.
+    // Learn kernel hyperparameters by maximizing log-likelihood of the
+    // training data.
     bool LearnHyperparams();
 
   private:

@@ -59,9 +59,6 @@ namespace gp {
 
   private:
     explicit RbfKernel(const VectorXd& lengths);
-
-    // Length scales.
-    VectorXd lengths_;
   }; //\class RbfKernel
 
 }  //\namespace gp

@@ -166,7 +166,8 @@ namespace gp {
     variance = 1.0 - cross.dot(llt_.solve(cross));
   }
 
-  // Learn kernel hyperparameters.
+  // Learn kernel hyperparameters by maximizing the log-likelihood of the
+  // training data.
   bool GaussianProcess::LearnHyperparams() {
     // TODO!
     return false;
