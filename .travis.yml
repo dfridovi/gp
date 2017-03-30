@@ -48,7 +48,17 @@ before_script:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo make install; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cd ../../..; fi
 
-  # Configure and make GP.
+  # Get Ceres-solver. It's not available yet as an apt package.
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then git clone https://ceres-solver.googlesource.com/ceres-solver; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cd ceres-solver; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then mkdir build && cd build; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cmake -DCMAKE_BUILD_TYPE=Release -DOPENMP=OFF -DSUITESPARSE=OFF -DCXSPARSE=OFF -DEIGENSPARSE=OFF -DLAPACK=OFF ..; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then make -j4; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo make install; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cd ../..; fi
+
+
+# Configure and make GP.
   - mkdir bin
   - mkdir build
   - cd build
