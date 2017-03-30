@@ -59,12 +59,12 @@ namespace gp {
   struct TrainingLogLikelihood {
     // Inputs: training points, training targets, kernel, and noise.
     // Optimization variables: kernel parameters.
-    const std::vector<VectorXd>* points_;
+    const PointSet points_;
     const VectorXd* targets_;
     const Kernel::Ptr kernel_;
     const double noise_;
 
-    TrainingLogLikelihood(const std::vector<VectorXd>* points,
+    TrainingLogLikelihood(const PointSet& points,
                           const VectorXd* targets,
                           const Kernel::Ptr& kernel,
                           double noise)
@@ -75,12 +75,10 @@ namespace gp {
 
     template <typename T>
     bool operator()(T const* const* params, T* resids) const {
-      const size_t dimension = points_[0].size();
-
       // First, create a new GP model using this set of parameters.
       // Parameters are already stored in the kernel!
       GaussianProcess gp(kernel_, noise_,
-                         *points_, *targets_, targets_->size());
+                         points_, *targets_, targets_->size());
 
       // Compute residuals. As above, each training point contributes
       // two residuals:
@@ -98,12 +96,12 @@ namespace gp {
     }
 
     // Factory method.
-    static ceres::CostFunction* Create(const std::vector<VectorXd>* points,
+    static ceres::CostFunction* Create(const PointSet& points,
                                        const VectorXd* targets,
                                        const Kernel::Ptr& kernel,
                                        double noise) {
-      CHECK_NOTNULL(points);
       CHECK_NOTNULL(targets);
+      CHECK_NOTNULL(points.get());
       CHECK_NOTNULL(kernel.get());
 
       CHECK_EQ(points->size(), targets->size());

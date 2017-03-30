@@ -52,6 +52,7 @@ namespace gp {
                                    size_t dimension, size_t max_points)
     : kernel_(kernel),
       noise_(noise),
+      points_(new std::vector<VectorXd>),
       max_points_(max_points),
       targets_(max_points),
       regressed_(max_points),
@@ -68,13 +69,14 @@ namespace gp {
     std::normal_distribution<double> normal(0.0, 0.1);
 
     // Populate 'points_' and 'targets_'.
+    points_->reserve(max_points_);
     for (size_t ii = 0; ii < max_points / 10 + 1; ii++) {
       VectorXd x(dimension);
 
       for (size_t jj = 0; jj < dimension; jj++)
         x(jj) = unif(rng);
 
-      points_.push_back(x);
+      points_->push_back(x);
       targets_(ii) = normal(rng);
     }
 
@@ -82,26 +84,26 @@ namespace gp {
     Covariance();
 
     // Compute Cholesky decomposition of covariance matrix.
-    llt_.compute(covariance_.topLeftCorner(points_.size(), points_.size()));
+    llt_.compute(covariance_.topLeftCorner(points_->size(), points_->size()));
 
     // Compute regressed targets.
-    regressed_.head(points_.size()) =
-      llt_.solve(targets_.head(points_.size()));
+    regressed_.head(points_->size()) =
+      llt_.solve(targets_.head(points_->size()));
   }
 
   GaussianProcess::GaussianProcess(const Kernel::Ptr& kernel, double noise,
-                                   const std::vector<VectorXd>& points,
-                                   size_t max_points)
+                                   const PointSet& points, size_t max_points)
     : kernel_(kernel),
       noise_(noise),
+      points_(points),
       max_points_(max_points),
       targets_(max_points),
       regressed_(max_points),
-      points_(points),
       covariance_(max_points, max_points) {
     CHECK_NOTNULL(kernel_.get());
+    CHECK_NOTNULL(points_.get());
     CHECK_GE(max_points_, 1);
-    CHECK_LE(points_.size(), max_points_);
+    CHECK_LE(points_->size(), max_points_);
     CHECK_GT(noise_, 0.0);
 
     // Random number generator.
@@ -110,56 +112,56 @@ namespace gp {
     std::normal_distribution<double> normal(0.0, 0.1);
 
     // Populate 'targets_'.
-    for (size_t ii = 0; ii < points_.size(); ii++)
+    for (size_t ii = 0; ii < points_->size(); ii++)
       targets_(ii) = normal(rng);
 
     // Compute covariance matrix.
     Covariance();
 
     // Compute Cholesky decomposition of covariance matrix.
-    llt_.compute(covariance_.topLeftCorner(points_.size(), points_.size()));
+    llt_.compute(covariance_.topLeftCorner(points_->size(), points_->size()));
 
     // Compute regressed targets.
-    regressed_.head(points_.size()) =
-      llt_.solve(targets_.head(points_.size()));
+    regressed_.head(points_->size()) =
+      llt_.solve(targets_.head(points_->size()));
   }
 
   GaussianProcess::GaussianProcess(const Kernel::Ptr& kernel, double noise,
-                                   const std::vector<VectorXd>& points,
+                                   const PointSet& points,
                                    const VectorXd& targets,
                                    size_t max_points)
     : kernel_(kernel),
       noise_(noise),
+      points_(points),
       max_points_(max_points),
       targets_(max_points),
       regressed_(max_points),
-      points_(points),
       covariance_(max_points, max_points) {
     CHECK_NOTNULL(kernel_.get());
     CHECK_GE(max_points_, 1);
-    CHECK_LE(points_.size(), max_points_);
-    CHECK_EQ(targets.size(), points_.size());
+    CHECK_LE(points_->size(), max_points_);
+    CHECK_EQ(points_->size(), targets.size());
     CHECK_GT(noise_, 0.0);
 
     // Set 'targets_'.
-    targets_.head(points_.size()) = targets;
+    targets_.head(points_->size()) = targets;
 
     // Compute covariance matrix.
     Covariance();
 
     // Compute Cholesky decomposition of covariance matrix.
-    llt_.compute(covariance_.topLeftCorner(points_.size(), points_.size()));
+    llt_.compute(covariance_.topLeftCorner(points_->size(), points_->size()));
 
     // Compute regressed targets.
-    regressed_.head(points_.size()) =
-      llt_.solve(targets_.head(points_.size()));
+    regressed_.head(points_->size()) =
+      llt_.solve(targets_.head(points_->size()));
   }
 
   // Evaluate mean and variance at a point.
   void GaussianProcess::Evaluate(const VectorXd& x,
                                  double& mean, double& variance) const {
     // Compute cross covariance.
-    VectorXd cross(points_.size());
+    VectorXd cross(points_->size());
     CrossCovariance(x, cross);
 
     // Compute mean and variance.
@@ -170,7 +172,7 @@ namespace gp {
   // Evaluate at the ii'th training point.
   void GaussianProcess::EvaluateTrainingPoint(
      size_t ii, double& mean, double& variance) const {
-    CHECK_LT(ii, points_.size());
+    CHECK_LT(ii, points_->size());
 
     // Extract cross covariance (must subtract off added noise).
     VectorXd cross = covariance_.col(ii);
@@ -187,7 +189,7 @@ namespace gp {
     // Create a Ceres problem.
     ceres::Problem problem;
     problem.AddResidualBlock(
-      TrainingLogLikelihood::Create(&points_, &targets_, kernel_, noise_),
+      TrainingLogLikelihood::Create(points_, &targets_, kernel_, noise_),
       NULL, // Squared loss (no outlier rejection).
       kernel_->Params().data()); // Direct access to kernel params.
 
@@ -213,18 +215,19 @@ namespace gp {
 
   // Compute the covariance and cross covariance against the training points.
   void GaussianProcess::Covariance() {
-    for (size_t ii = 0; ii < points_.size(); ii++) {
+    for (size_t ii = 0; ii < points_->size(); ii++) {
       covariance_(ii, ii) = 1.0 + noise_;
 
       for (size_t jj = 0; jj < ii; jj++) {
-        covariance_(ii, jj) = kernel_->Evaluate(points_[ii], points_[jj]);
+        covariance_(ii, jj) =
+          kernel_->Evaluate(points_->at(ii), points_->at(jj));
         covariance_(jj, ii) = covariance_(ii, jj);
       }
     }
   }
 
   void GaussianProcess::CrossCovariance(const VectorXd& x, VectorXd& cross) const {
-    for (size_t ii = 0; ii < points_.size(); ii++)
-      cross(ii) = kernel_->Evaluate(points_[ii], x);
+    for (size_t ii = 0; ii < points_->size(); ii++)
+      cross(ii) = kernel_->Evaluate(points_->at(ii), x);
   }
 }  //\namespace gp

@@ -43,18 +43,23 @@
 #ifndef GP_TYPES_H
 #define GP_TYPES_H
 
-#include <limits>
+
 #include <Eigen/Core>
+#include <limits>
+#include <memory>
+#include <vector>
 
 namespace gp {
-
-// --------------- Internal typedefs and constants --------------- //
 
 // -------------------- Third-party typedefs -------------------- //
 
 // Eigen dynamic-sized matrix and vector types.
 typedef ::Eigen::MatrixXd MatrixXd;
 typedef ::Eigen::VectorXd VectorXd;
+
+// --------------- Internal typedefs and constants --------------- //
+
+typedef std::shared_ptr< std::vector<VectorXd> > PointSet;
 
 }  //\namespace gp
 

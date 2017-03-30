@@ -61,10 +61,10 @@ namespace gp {
     explicit GaussianProcess(const Kernel::Ptr& kernel, double noise,
                              size_t dimension, size_t max_points = 100);
     explicit GaussianProcess(const Kernel::Ptr& kernel, double noise,
-                             const std::vector<VectorXd>& points,
+                             const PointSet& points,
                              size_t max_points = 100);
     explicit GaussianProcess(const Kernel::Ptr& kernel, double noise,
-                             const std::vector<VectorXd>& points,
+                             const PointSet& points,
                              const VectorXd& targets,
                              size_t max_points = 100);
 
@@ -88,7 +88,7 @@ namespace gp {
     const double noise_;
 
     // Training points, targets, and regressed targets (inv(cov) * targets).
-    std::vector<VectorXd> points_;
+    const PointSet points_;
     VectorXd targets_;
     VectorXd regressed_;
 
