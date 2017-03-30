@@ -41,22 +41,25 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <gaussian_process.hpp>
+#include <cost_functors.hpp>
 
+#include <ceres/ceres.h>
 #include <random>
 
 namespace gp {
 
-  GaussianProcess::GaussianProcess(const Kernel::Ptr& kernel,
+  GaussianProcess::GaussianProcess(const Kernel::Ptr& kernel, double noise,
                                    size_t dimension, size_t max_points)
     : kernel_(kernel),
-      dimension_(dimension),
+      noise_(noise),
       max_points_(max_points),
       targets_(max_points),
       regressed_(max_points),
       covariance_(max_points, max_points) {
     CHECK_NOTNULL(kernel_.get());
     CHECK_GE(max_points_, 1);
-    CHECK_GE(dimension_, 1);
+    CHECK_GE(dimension, 1);
+    CHECK_GT(noise_, 0.0);
 
     // Random number generator.
     std::random_device rd;
@@ -66,9 +69,9 @@ namespace gp {
 
     // Populate 'points_' and 'targets_'.
     for (size_t ii = 0; ii < max_points / 10 + 1; ii++) {
-      VectorXd x(dimension_);
+      VectorXd x(dimension);
 
-      for (size_t jj = 0; jj < dimension_; jj++)
+      for (size_t jj = 0; jj < dimension; jj++)
         x(jj) = unif(rng);
 
       points_.push_back(x);
@@ -86,11 +89,11 @@ namespace gp {
       llt_.solve(targets_.head(points_.size()));
   }
 
-  GaussianProcess::GaussianProcess(const Kernel::Ptr& kernel,
+  GaussianProcess::GaussianProcess(const Kernel::Ptr& kernel, double noise,
                                    const std::vector<VectorXd>& points,
-                                   size_t dimension, size_t max_points)
+                                   size_t max_points)
     : kernel_(kernel),
-      dimension_(dimension),
+      noise_(noise),
       max_points_(max_points),
       targets_(max_points),
       regressed_(max_points),
@@ -98,9 +101,8 @@ namespace gp {
       covariance_(max_points, max_points) {
     CHECK_NOTNULL(kernel_.get());
     CHECK_GE(max_points_, 1);
-    CHECK_GE(dimension_, 1);
     CHECK_LE(points_.size(), max_points_);
-    CHECK_EQ(dimension_, points_[0].size());
+    CHECK_GT(noise_, 0.0);
 
     // Random number generator.
     std::random_device rd;
@@ -122,12 +124,12 @@ namespace gp {
       llt_.solve(targets_.head(points_.size()));
   }
 
-  GaussianProcess::GaussianProcess(const Kernel::Ptr& kernel,
+  GaussianProcess::GaussianProcess(const Kernel::Ptr& kernel, double noise,
                                    const std::vector<VectorXd>& points,
                                    const VectorXd& targets,
-                                   size_t dimension, size_t max_points)
+                                   size_t max_points)
     : kernel_(kernel),
-      dimension_(dimension),
+      noise_(noise),
       max_points_(max_points),
       targets_(max_points),
       regressed_(max_points),
@@ -135,10 +137,9 @@ namespace gp {
       covariance_(max_points, max_points) {
     CHECK_NOTNULL(kernel_.get());
     CHECK_GE(max_points_, 1);
-    CHECK_GE(dimension_, 1);
     CHECK_LE(points_.size(), max_points_);
     CHECK_EQ(targets.size(), points_.size());
-    CHECK_EQ(dimension_, points_[0].size());
+    CHECK_GT(noise_, 0.0);
 
     // Set 'targets_'.
     targets_.head(points_.size()) = targets;
@@ -166,17 +167,54 @@ namespace gp {
     variance = 1.0 - cross.dot(llt_.solve(cross));
   }
 
+  // Evaluate at the ii'th training point.
+  void GaussianProcess::EvaluateTrainingPoint(
+     size_t ii, double& mean, double& variance) const {
+    CHECK_LT(ii, points_.size());
+
+    // Extract cross covariance (must subtract off added noise).
+    VectorXd cross = covariance_.col(ii);
+    cross(ii) -= noise_;
+
+    // Compute mean and variance.
+    mean = cross.dot(regressed_);
+    variance = 1.0 - cross.dot(llt_.solve(cross));
+  }
+
   // Learn kernel hyperparameters by maximizing the log-likelihood of the
   // training data.
   bool GaussianProcess::LearnHyperparams() {
-    // TODO!
-    return false;
+    // Create a Ceres problem.
+    ceres::Problem problem;
+    problem.AddResidualBlock(
+      TrainingLogLikelihood::Create(&points_, &targets_, kernel_, noise_),
+      NULL, // Squared loss (no outlier rejection).
+      kernel_->Params().data()); // Direct access to kernel params.
+
+    // Assume all parameters are positive. This can be removed later,
+    // and at least for the RBF kernel it really shouldn't matter.
+    for (size_t ii = 0; ii < kernel_->Params().size(); ii++)
+      problem.SetParameterLowerBound(kernel_->Params().data(), ii, 0.0);
+
+    // Set up solver options.
+    ceres::Solver::Summary summary;
+    ceres::Solver::Options options;
+    options.linear_solver_type = ceres::DENSE_QR;
+    options.function_tolerance = 1e-16;
+    options.gradient_tolerance = 1e-16;
+    options.trust_region_strategy_type = ceres::LEVENBERG_MARQUARDT;
+
+    // Solve and return. Solution parameters are automatically stored in
+    // the kernel!
+    ceres::Solve(options, &problem, &summary);
+
+    return summary.IsSolutionUsable();
   }
 
   // Compute the covariance and cross covariance against the training points.
   void GaussianProcess::Covariance() {
     for (size_t ii = 0; ii < points_.size(); ii++) {
-      covariance_(ii, ii) = 1.0;
+      covariance_(ii, ii) = 1.0 + noise_;
 
       for (size_t jj = 0; jj < ii; jj++) {
         covariance_(ii, jj) = kernel_->Evaluate(points_[ii], points_[jj]);

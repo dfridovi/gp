@@ -47,6 +47,7 @@
 
 #include "types.hpp"
 
+#include <glog/logging.h>
 #include <memory>
 
 namespace gp {
@@ -64,7 +65,8 @@ namespace gp {
     virtual double Evaluate(const VectorXd& x, const VectorXd& y) const;
 
     // Access and reset params.
-    const VectorXd& Params() const { return params_; }
+    VectorXd& Params() { return params_; }
+    const VectorXd& ImmutableParams() const { return params_; }
     void Reset(const VectorXd& params) {
       CHECK_EQ(params_.size(), params.size());
       params_ = params;

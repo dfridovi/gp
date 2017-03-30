@@ -57,54 +57,72 @@ namespace gp {
   // training point contributes two residuals: (1) is from the normalization
   // (related to its variance) and (2) is essentially the z-score.
   struct TrainingLogLikelihood {
-    // Inputs: training points, training targets, and initial kernel.
+    // Inputs: training points, training targets, kernel, and noise.
     // Optimization variables: kernel parameters.
     const std::vector<VectorXd>* points_;
     const VectorXd* targets_;
     const Kernel::Ptr kernel_;
+    const double noise_;
 
     TrainingLogLikelihood(const std::vector<VectorXd>* points,
                           const VectorXd* targets,
-                          const Kernel::Ptr& kernel)
+                          const Kernel::Ptr& kernel,
+                          double noise)
       : points_(points),
         targets_(targets),
-        kernel_(kernel) {
-      CHECK_NOTNULL(points_);
-      CHECK_NOTNULL(targets_);
-      CHECK_NOTNULL(kernel_.get());
-    }
+        kernel_(kernel),
+        noise_(noise) {}
 
     template <typename T>
-    bool operator()(T const* const* belief, T* expected_error) const {
-      // Compute the difference between the expected measurement and the
-      // actual measurement.
-      *expected_error = -static_cast<T>(measurement_);
+    bool operator()(T const* const* params, T* resids) const {
+      const size_t dimension = points_[0].size();
 
-      for (const auto& voxel_id : *voxels_) {
-        *expected_error += belief[0][voxel_id];
+      // First, create a new GP model using this set of parameters.
+      // Parameters are already stored in the kernel!
+      GaussianProcess gp(kernel_, noise_,
+                         *points_, *targets_, targets_->size());
+
+      // Compute residuals. As above, each training point contributes
+      // two residuals:
+      // (1) sqrt(log(2pi * var(points_[ii])))
+      // (2) (mu(points_[ii]) - targets_[ii]) / sqrt(var(points_[ii]))
+      double mean, variance;
+      for (size_t ii = 0; ii < points_->size(); ii++) {
+        gp.EvaluateTrainingPoint(ii, mean, variance);
+        resids[2 * ii] += static_cast<T>(std::sqrt(std::log(2.0 * M_PI * variance)));
+        resids[2 * ii + 1] = static_cast<T>((mean - targets_->operator()(ii)) /
+                                            std::sqrt(variance));
       }
 
       return true;
     }
 
     // Factory method.
-    static ceres::CostFunction* Create(unsigned int num_rows,
-                                       unsigned int num_cols,
-                                       const std::vector<unsigned int>* voxels,
-                                       const unsigned int measurement) {
-      // Only a single residual.
-      const int kNumResiduals = 1;
+    static ceres::CostFunction* Create(const std::vector<VectorXd>* points,
+                                       const VectorXd* targets,
+                                       const Kernel::Ptr& kernel,
+                                       double noise) {
+      CHECK_NOTNULL(points);
+      CHECK_NOTNULL(targets);
+      CHECK_NOTNULL(kernel.get());
 
-      // Number of parameters is the number of grid cells.
-      const int kNumParameters = static_cast<int>(num_rows * num_cols);
+      CHECK_EQ(points->size(), targets->size());
+      CHECK_GE(points->size(), 1);
+      CHECK_GT(noise, 0.0);
+
+      // Number of residuals is twice the number of points.
+      const int kNumResiduals = 2 * points->size();
+
+      // Number of parameters is given by the kernel.
+      const int kNumParameters = static_cast<int>(kernel->Params().size());
 
       // Stride. Number of derivatives to calculate. See below for details:
       // http://ceres-solver.org/nnls_modeling.html#dynamicautodiffcostfunction
       const int kStride = 4;
 
-      ceres::DynamicAutoDiffCostFunction<BeliefError, kStride>* cost =
-        new ceres::DynamicAutoDiffCostFunction<BeliefError, kStride>(
-                                                                     new BeliefError(voxels, measurement));
+      ceres::DynamicAutoDiffCostFunction<TrainingLogLikelihood, kStride>* cost =
+        new ceres::DynamicAutoDiffCostFunction<TrainingLogLikelihood, kStride>(
+          new TrainingLogLikelihood(points, targets, kernel, noise));
       cost->AddParameterBlock(kNumParameters);
       cost->SetNumResiduals(kNumResiduals);
       return cost;

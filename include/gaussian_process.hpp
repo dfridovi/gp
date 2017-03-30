@@ -58,18 +58,19 @@ namespace gp {
 
     // Constructors. By default picks 10% of the maximum number of points
     // randomly within the unit box [-1, 1]^d.
-    explicit GaussianProcess(const Kernel::Ptr& kernel,
+    explicit GaussianProcess(const Kernel::Ptr& kernel, double noise,
                              size_t dimension, size_t max_points = 100);
-    explicit GaussianProcess(const Kernel::Ptr& kernel,
+    explicit GaussianProcess(const Kernel::Ptr& kernel, double noise,
                              const std::vector<VectorXd>& points,
-                             size_t dimension, size_t max_points = 100);
-    explicit GaussianProcess(const Kernel::Ptr& kernel,
+                             size_t max_points = 100);
+    explicit GaussianProcess(const Kernel::Ptr& kernel, double noise,
                              const std::vector<VectorXd>& points,
                              const VectorXd& targets,
-                             size_t dimension, size_t max_points = 100);
+                             size_t max_points = 100);
 
     // Evaluate mean and variance at a point.
     void Evaluate(const VectorXd& x, double& mean, double& variance) const;
+    void EvaluateTrainingPoint(size_t ii, double& mean, double& variance) const;
 
     // Learn kernel hyperparameters by maximizing log-likelihood of the
     // training data.
@@ -83,8 +84,8 @@ namespace gp {
     // Kernel.
     const Kernel::Ptr kernel_;
 
-    // Dimension.
-    const size_t dimension_;
+    // Noise variance.
+    const double noise_;
 
     // Training points, targets, and regressed targets (inv(cov) * targets).
     std::vector<VectorXd> points_;
