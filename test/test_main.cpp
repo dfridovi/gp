@@ -47,7 +47,8 @@
 #include <GL/glut.h>
 #endif
 
-DEFINE_bool(visualize, false, "Visualize results of tests.");
+DEFINE_bool(visualize, false,
+            "Visualize results of tests. Can only show one test at a time.");
 
 int main(int argc, char** argv) {
   std::string log_file = GP_TEST_DATA_DIR + std::string("/out.log");

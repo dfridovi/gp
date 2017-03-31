@@ -95,9 +95,11 @@ namespace gp {
       }
 
       // Plot.
-      plot(x, mu); set(2); set("p");
+      plot(x, mu); set(2); set("b");
       plot(x, upper); set(2); set("r"); set(":");
       plot(x, lower); set(2); set("r"); set(":");
+
+      axis(xmin_, xmax_, ymin_, ymax_);
 
       title(title_);
       xlabel(xlabel_);

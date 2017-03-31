@@ -80,6 +80,29 @@ namespace learn_hyperparams {
     CHECK_NOTNULL(plot);
     plot->reshape(w, h);
   }
+
+  void idle() { glutPostRedisplay(); usleep(10000); }
+
+  void mouse(int button, int state, int x, int y ){
+    CHECK_NOTNULL(plot);
+    plot->mouse(button, state, x, y);
+  }
+
+  void motion(int x, int y) {
+    CHECK_NOTNULL(plot);
+    plot->motion(x, y);
+  }
+
+  void passive(int x, int y) {
+    CHECK_NOTNULL(plot);
+    plot->passivemotion(x, y);
+  }
+
+  void keyboard(unsigned char key, int x, int y){
+    CHECK_NOTNULL(plot);
+    plot->keyboard(key, x, y);
+  }
+
 } //\ namespace learn_hyperparameters
 
 // Check that the gradient computation in TrainingLogLikelihood is correct.
@@ -194,13 +217,18 @@ TEST(GaussianProcess, TestLearnHyperparams) {
   // Maybe visualize.
   if (FLAGS_visualize) {
     // Create a new plot.
-    learn_hyperparams::plot = new Plot1D(&gp, 0.0, 1.0, -1.0, 1.0, 1000,
+    learn_hyperparams::plot = new Plot1D(&gp, 0.0, 1.0, -0.3, 0.3, 1000,
                                          "Learned Hyperparameters");
 
     // Visualize.
     glutCreateWindow(100, 100, 400, 300);
-    glutDisplayFunc( learn_hyperparams::display );
-    glutReshapeFunc( learn_hyperparams::reshape );
+    glutDisplayFunc(learn_hyperparams::display);
+    glutReshapeFunc(learn_hyperparams::reshape);
+    glutIdleFunc(learn_hyperparams::idle);
+    glutMotionFunc(learn_hyperparams::motion);
+    glutMouseFunc(learn_hyperparams::mouse);
+    glutPassiveMotionFunc(learn_hyperparams::passive);
+    glutKeyboardFunc(learn_hyperparams::keyboard);
     glutMainLoop();
 
     delete learn_hyperparams::plot;
