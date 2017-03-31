@@ -33,6 +33,7 @@
  * Please contact the author(s) of this library if you have any questions.
  * Authors: David Fridovich-Keil   ( dfk@eecs.berkeley.edu )
  */
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Defines the RbfKernel class, which is derived from the Kernel base class.
@@ -41,53 +42,28 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <rbf_kernel.hpp>
+#ifndef GP_KERNELS_RBF_KERNEL_H
+#define GP_KERNELS_RBF_KERNEL_H
 
-#include <math.h>
+#include "../kernels/kernel.hpp"
 
 namespace gp {
 
-  // Factory method.
-  Kernel::Ptr RbfKernel::Create(const VectorXd& lengths) {
-    Kernel::Ptr ptr(new RbfKernel(lengths));
-    return ptr;
-  }
+  class RbfKernel : public Kernel {
+  public:
+    // Factory method.
+    static Kernel::Ptr Create(const VectorXd& lengths);
 
-  // Constructor.
-  RbfKernel::RbfKernel(const VectorXd& lengths)
-    : Kernel(lengths) {}
+    // Pure virtual methods to be implemented in a derived class.
+    double Evaluate(const VectorXd& x, const VectorXd& y) const;
+    double Partial(const VectorXd& x, const VectorXd& y, size_t ii) const;
+    void Gradient(const VectorXd& x, const VectorXd& y,
+                  VectorXd& gradient) const;
 
-  // Pure virtual methods to be implemented in a derived class.
-  double RbfKernel::Evaluate(const VectorXd& x, const VectorXd& y) const {
-    const VectorXd diff = x - y;
-
-    return std::exp(-0.5 * diff.cwiseQuotient(params_).squaredNorm());
-  }
-
-  double RbfKernel::Partial(const VectorXd& x, const VectorXd& y,
-                            size_t ii) const {
-    CHECK_LT(ii, params_.size());
-    const VectorXd diff = x - y;
-
-    // Evaluate the kernel.
-    const double kernel =
-      std::exp(-0.5 * diff.cwiseQuotient(params_).squaredNorm());
-
-    return kernel * diff(ii) * diff(ii) /
-      (params_(ii) * params_(ii) * params_(ii));
-  }
-
-  void RbfKernel::Gradient(const VectorXd& x, const VectorXd& y,
-                           VectorXd& gradient) const {
-    const VectorXd diff = x - y;
-
-    // Evaluate the kernel.
-    const double kernel =
-      std::exp(-0.5 * diff.cwiseQuotient(params_).squaredNorm());
-
-    gradient = kernel * diff.cwiseProduct(diff).cwiseQuotient(
-      params_.cwiseProduct(params_).cwiseProduct(params_));
-  }
-
+  private:
+    explicit RbfKernel(const VectorXd& lengths);
+  }; //\class RbfKernel
 
 }  //\namespace gp
+
+#endif

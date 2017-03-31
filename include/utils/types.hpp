@@ -40,9 +40,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef GP_TYPES_H
-#define GP_TYPES_H
-
+#ifndef GP_UTILS_TYPES_H
+#define GP_UTILS_TYPES_H
 
 #include <Eigen/Core>
 #include <limits>

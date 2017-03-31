@@ -39,11 +39,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef GP_COST_FUNCTORS_H
-#define GP_COST_FUNCTORS_H
+#ifndef GP_OPTIMIZATION_COST_FUNCTORS_H
+#define GP_OPTIMIZATION_COST_FUNCTORS_H
 
-#include "gaussian_process.hpp"
-#include "kernel.hpp"
+#include "../process/gaussian_process.hpp"
+#include "../kernels/kernel.hpp"
 
 #include <ceres/ceres.h>
 #include <glog/logging.h>

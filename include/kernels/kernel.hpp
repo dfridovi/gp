@@ -42,10 +42,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef GP_KERNEL_H
-#define GP_KERNEL_H
+#ifndef GP_KERNELS_KERNEL_H
+#define GP_KERNELS_KERNEL_H
 
-#include "types.hpp"
+#include "../utils/types.hpp"
 
 #include <glog/logging.h>
 #include <memory>

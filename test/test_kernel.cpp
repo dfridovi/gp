@@ -34,8 +34,8 @@
  * Authors: David Fridovich-Keil   ( dfk@eecs.berkeley.edu )
  */
 
-#include <rbf_kernel.hpp>
-#include <types.hpp>
+#include <kernels/rbf_kernel.hpp>
+#include <utils/types.hpp>
 
 #include <glog/logging.h>
 #include <gtest/gtest.h>

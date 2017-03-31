@@ -40,11 +40,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef GP_GAUSSIAN_PROCESS_H
-#define GP_GAUSSIAN_PROCESS_H
+#ifndef GP_PROCESS_GAUSSIAN_PROCESS_H
+#define GP_PROCESS_GAUSSIAN_PROCESS_H
 
-#include "kernel.hpp"
-#include "types.hpp"
+#include "../kernels/kernel.hpp"
+#include "../utils/types.hpp"
 
 #include <Eigen/Cholesky>
 #include <glog/logging.h>

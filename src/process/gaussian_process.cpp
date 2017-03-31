@@ -40,8 +40,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <gaussian_process.hpp>
-#include <cost_functors.hpp>
+#include <process/gaussian_process.hpp>
+#include <optimization/cost_functors.hpp>
 
 #include <ceres/ceres.h>
 #include <random>
