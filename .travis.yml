@@ -37,6 +37,10 @@ install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install binutils-gold; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libxmu-dev libxi-dev; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libboost-all-dev; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install software-properties-common; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository ppa:george-edison55/cmake-3.x; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get update; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get upgrade; fi
 
 before_script:
   # Get Eigen. The apt-get version on 12.04 is too old; we need at least 3.1.0.
