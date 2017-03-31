@@ -1,0 +1,48 @@
+\hypertarget{classgp_1_1_gaussian_process}{}\section{gp\+:\+:Gaussian\+Process Class Reference}
+\label{classgp_1_1_gaussian_process}\index{gp\+::\+Gaussian\+Process@{gp\+::\+Gaussian\+Process}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classgp_1_1_gaussian_process_a47cdf94a91858d0931115260e5e1704c}{}\label{classgp_1_1_gaussian_process_a47cdf94a91858d0931115260e5e1704c} 
+{\bfseries Gaussian\+Process} (const Kernel\+::\+Ptr \&kernel, double noise, size\+\_\+t dimension, size\+\_\+t max\+\_\+points=100)
+\item 
+\hypertarget{classgp_1_1_gaussian_process_a1e5a8059688294936f4396a88082e335}{}\label{classgp_1_1_gaussian_process_a1e5a8059688294936f4396a88082e335} 
+{\bfseries Gaussian\+Process} (const Kernel\+::\+Ptr \&kernel, double noise, const Point\+Set \&points, size\+\_\+t max\+\_\+points=100)
+\item 
+\hypertarget{classgp_1_1_gaussian_process_a3dcd374d4090be21c059ef8ccde1519c}{}\label{classgp_1_1_gaussian_process_a3dcd374d4090be21c059ef8ccde1519c} 
+{\bfseries Gaussian\+Process} (const Kernel\+::\+Ptr \&kernel, double noise, const Point\+Set \&points, const Vector\+Xd \&targets, size\+\_\+t max\+\_\+points=100)
+\item 
+\hypertarget{classgp_1_1_gaussian_process_a850493ba48793ad4bf2e17043d469928}{}\label{classgp_1_1_gaussian_process_a850493ba48793ad4bf2e17043d469928} 
+void {\bfseries Evaluate} (const Vector\+Xd \&x, double \&mean, double \&variance) const
+\item 
+\hypertarget{classgp_1_1_gaussian_process_a2594af50120c38f7c3d4dd894fb07d32}{}\label{classgp_1_1_gaussian_process_a2594af50120c38f7c3d4dd894fb07d32} 
+void {\bfseries Evaluate\+Training\+Point} (size\+\_\+t ii, double \&mean, double \&variance) const
+\item 
+\hypertarget{classgp_1_1_gaussian_process_a8ad3e9ac5a536ed71be83fac8ca4f0af}{}\label{classgp_1_1_gaussian_process_a8ad3e9ac5a536ed71be83fac8ca4f0af} 
+bool {\bfseries Learn\+Hyperparams} ()
+\item 
+\hypertarget{classgp_1_1_gaussian_process_a4f55d908c1033b8d02f986321abc4257}{}\label{classgp_1_1_gaussian_process_a4f55d908c1033b8d02f986321abc4257} 
+const Matrix\+Xd \& {\bfseries Immutable\+Covariance} () const
+\item 
+\hypertarget{classgp_1_1_gaussian_process_ac80689ba379920754defa7e585cf20bf}{}\label{classgp_1_1_gaussian_process_ac80689ba379920754defa7e585cf20bf} 
+const Vector\+Xd \& {\bfseries Immutable\+Regressed\+Targets} () const
+\item 
+\hypertarget{classgp_1_1_gaussian_process_a281b5c08bb7a012203a49d992098e0c3}{}\label{classgp_1_1_gaussian_process_a281b5c08bb7a012203a49d992098e0c3} 
+const Eigen\+::\+L\+LT$<$ Matrix\+Xd $>$ \& {\bfseries Immutable\+Cholesky} () const
+\item 
+\hypertarget{classgp_1_1_gaussian_process_ac1c7728df9a864da192ad77656f5567e}{}\label{classgp_1_1_gaussian_process_ac1c7728df9a864da192ad77656f5567e} 
+size\+\_\+t {\bfseries Dimension} () const
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+Definition at line 55 of file gaussian\+\_\+process.\+hpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/davidfridovichkeil/\+Documents/\+Developer/gp/include/process/gaussian\+\_\+process.\+hpp\item 
+/\+Users/davidfridovichkeil/\+Documents/\+Developer/gp/src/process/gaussian\+\_\+process.\+cpp\end{DoxyCompactItemize}
