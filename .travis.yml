@@ -37,10 +37,6 @@ install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install binutils-gold; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libxmu-dev libxi-dev; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libboost-all-dev; fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install software-properties-common; fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository ppa:george-edison55/cmake-3.x -y; fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get update; fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get upgrade; fi
 
 before_script:
   # Get Eigen. The apt-get version on 12.04 is too old; we need at least 3.1.0.
@@ -62,7 +58,13 @@ before_script:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo make install; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cd ../..; fi
 
-# Configure and make GP.
+   # Get a newer version of cmake.
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget http://www.cmake.org/files/v3.5/cmake-3.5.2.tar.gz; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then tar xf cmake-3.5.2.tar.gz; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cd cmake-3.5.2; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then ./configure && make && sudo make install && cd ..; fi
+
+  # Configure and make GP.
   - mkdir bin
   - mkdir build
   - cd build
