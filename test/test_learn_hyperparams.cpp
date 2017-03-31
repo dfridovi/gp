@@ -145,7 +145,8 @@ TEST(GaussianProcess, TestLearnHyperparams) {
 
   EXPECT_TRUE(gp.LearnHyperparams());
 
-  std::cout << "Length: " << kernel->ImmutableParams().transpose() << std::endl;
+  //  std::cout << "Length: "
+  //            << kernel->ImmutableParams().transpose() << std::endl;
 
   // Test that we have approximated the function well.
   double squared_error = 0.0;

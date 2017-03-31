@@ -200,9 +200,11 @@ namespace gp {
     // Set solver parameters.
     ceres::GradientProblemSolver::Summary summary;
     ceres::GradientProblemSolver::Options options;
-    options.minimizer_progress_to_stdout = true;
+    options.minimizer_progress_to_stdout = false;
+    options.max_num_iterations = 100;
     options.max_num_line_search_step_size_iterations = 50;
-    options.max_num_line_search_direction_restarts = 20;
+    options.max_num_line_search_direction_restarts = 25;
+    options.max_lbfgs_rank = 15;
     //    options.line_search_type = ceres::ARMIJO;
     //    options.line_search_direction_type = ceres::NONLINEAR_CONJUGATE_GRADIENT;
 
