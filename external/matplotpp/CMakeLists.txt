@@ -12,7 +12,7 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 list (APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules )
 find_package ( OpenGL REQUIRED )
-find_package ( GLEW REQUIRED )
+#find_package ( GLEW REQUIRED )
 find_package ( GLUT REQUIRED )
 
 set ( COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include )
@@ -20,7 +20,7 @@ set ( COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include )
 include_directories (
     ${COMMON_INCLUDES}
     ${OPENGL_INCLUDE_DIRS}
-    ${GLEW_INCLUDE_DIRS}
+#    ${GLEW_INCLUDE_DIRS}
     ${GLUT_INCLUDE_DIRS}
 )
 
