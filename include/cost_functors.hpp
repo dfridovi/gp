@@ -88,9 +88,11 @@ namespace gp {
       const VectorXd& regressed = gp.ImmutableRegressedTargets();
       const MatrixXd& L = llt.matrixL();
 
+      const size_t N = points_->size();
+
       // Compute log det of covariance matrix.
       double logdet = 0.0;
-      for (size_t ii = 0; ii < L.rows(); ii++)
+      for (size_t ii = 0; ii < N; ii++)
         logdet += std::log(L(ii, ii));
 
       logdet *= 2.0;
@@ -101,15 +103,15 @@ namespace gp {
       for (size_t ii = 0; ii < NumParameters(); ii++)
         barrier -= std::log(kBarrierScaling * parameters[ii]);
 
-      *cost = targets_->dot(regressed) + logdet + barrier;
+      *cost = targets_->head(N).dot(regressed.head(N)) + logdet + barrier;
 
       // Maybe compute gradient.
       if (gradient) {
-        MatrixXd dK(points_->size(), points_->size());
+        MatrixXd dK(N, N);
 
         for (size_t ii = 0; ii < NumParameters(); ii++) {
           // Compute the derivative of covariance against the ii'th parameter.
-          for (size_t jj = 0; jj < points_->size(); jj++) {
+          for (size_t jj = 0; jj < N; jj++) {
             dK(jj, jj) = kernel_->Partial(points_->at(jj), points_->at(jj), ii);
 
             for (size_t kk = 0; kk < jj; kk++) {
@@ -120,8 +122,8 @@ namespace gp {
           }
 
           // Compute the gradient. Must add the gradient of the log barrier.
-          gradient[ii] = llt.solve(dK).trace() - regressed.dot(dK * regressed) -
-            1.0 / parameters[ii];
+          gradient[ii] = llt.solve(dK).trace() - 1.0 / parameters[ii] -
+            regressed.head(N).dot(dK * regressed.head(N));
         }
       }
 
