@@ -57,8 +57,7 @@
 #include <GL/glut.h>
 #endif
 
-//DEFINE_bool(visualize, false, "Visualize results of tests.");
-bool FLAGS_visualize = true;
+DECLARE_bool(visualize);
 
 namespace gp {
 

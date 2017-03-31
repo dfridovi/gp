@@ -57,14 +57,6 @@ before_script:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo make install; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cd ../..; fi
 
-  # Get my fork of matplotpp.
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then git clone https://github.com/dfridovi/matplotpp; fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cd matplotpp && mkdir build && mkdir bin && cd build; fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cmake ..; fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then make -j4; fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo make install; fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cd ../..; fi
-
 # Configure and make GP.
   - mkdir bin
   - mkdir build
