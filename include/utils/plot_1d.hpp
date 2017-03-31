@@ -56,11 +56,16 @@ namespace gp {
   public:
     ~Plot1D() {}
     Plot1D(const GaussianProcess* const gp, double xmin, double xmax,
-           double ymin, double ymax, size_t num_points = 100)
+           double ymin, double ymax, size_t num_points = 100,
+           const std::string& title = "", const std::string& xlabel = "",
+           const std::string& ylabel = "")
       : gp_(gp),
         xmin_(xmin), xmax_(xmax),
         ymin_(ymin), ymax_(ymax),
         num_points_(num_points),
+        title_(title),
+        xlabel_(xlabel),
+        ylabel_(ylabel),
         MatPlot() {
       CHECK_NOTNULL(gp);
       CHECK_EQ(gp_->Dimension(), 1);
@@ -90,9 +95,13 @@ namespace gp {
       }
 
       // Plot.
-      plot(x, mu); set("r");
-      plot(x, upper); set("b:");
-      plot(x, lower); set("b:");
+      plot(x, mu); set(2); set("b");
+      plot(x, upper); set(2); set("r"); set(":");
+      plot(x, lower); set(2); set("r"); set(":");
+
+      title(title_);
+      xlabel(xlabel_);
+      ylabel(ylabel_);
     }
 
   private:
@@ -102,6 +111,9 @@ namespace gp {
     // Plot params.
     const double xmin_, xmax_, ymin_, ymax_;
     const size_t num_points_;
+
+    // Title and labels.
+    const std::string title_, xlabel_, ylabel_;
   }; //\ class Plot1D
 
 }  //\namespace gp

@@ -194,7 +194,8 @@ TEST(GaussianProcess, TestLearnHyperparams) {
   // Maybe visualize.
   if (FLAGS_visualize) {
     // Create a new plot.
-    learn_hyperparams::plot = new Plot1D(&gp, 0.0, 1.0, -1.0, 1.0, 1000);
+    learn_hyperparams::plot = new Plot1D(&gp, 0.0, 1.0, -1.0, 1.0, 1000,
+                                         "Learned Hyperparameters");
 
     // Visualize.
     glutCreateWindow(100, 100, 400, 300);
