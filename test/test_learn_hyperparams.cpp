@@ -36,6 +36,7 @@
 
 #include <rbf_kernel.hpp>
 #include <gaussian_process.hpp>
+#include <cost_functors.hpp>
 #include <types.hpp>
 
 #include <glog/logging.h>
@@ -52,11 +53,70 @@ double f(double x) {
   return (x - 0.5) * (x - 0.5) + 0.1 * std::sin(2.0 * M_PI * 10.0 * x);
 }
 
+// Check that the gradient computation in TrainingLogLikelihood is correct.
+TEST(TrainingLogLikelihood, TestGradient) {
+  const size_t kDimension = 10;
+  const size_t kNumTrainingPoints = 100;
+  const size_t kNumTests = 100;
+  const double kEpsilon = 1e-8;
+  const double kMaxError = 1e-4;
+  const double kNoiseVariance = 0.1;
+
+  // Random number generator.
+  std::random_device rd;
+  std::default_random_engine rng(rd());
+  std::uniform_real_distribution<double> unif(0.0, 1.0);
+
+  // Get training points/targets.
+  PointSet points(new std::vector<VectorXd>);
+  VectorXd targets(kNumTrainingPoints);
+
+  for (size_t ii = 0; ii < kNumTrainingPoints; ii++) {
+    points->push_back(VectorXd::Random(kDimension));
+    targets(ii) = unif(rng);
+  }
+
+  // Create a kernel.
+  VectorXd lengths(kDimension);
+  for (size_t ii = 0; ii < kDimension; ii++)
+    lengths(ii) = 1.0 + unif(rng);
+
+  const Kernel::Ptr kernel = RbfKernel::Create(lengths);
+
+  // Create a TrainingLogLikelihood.
+  TrainingLogLikelihood cost(points, &targets, kernel, kNoiseVariance);
+
+  // Test that the analytic and numerical derivatives match at a bunch of
+  // different length vectors.
+  double parameters[kDimension];
+  double gradient[kDimension];
+  for (size_t ii = 0; ii < kNumTests; ii++) {
+    // Pick a random set of length vectors.
+    for (size_t jj = 0; jj < kDimension; jj++)
+      parameters[jj] = 1.0 + unif(rng);
+
+    // Evaluate objective and gradient.
+    double objective;
+    EXPECT_TRUE(cost.Evaluate(parameters, &objective, gradient));
+
+    // Evaluate numerical gradient with a forward difference.
+    for (size_t jj = 0; jj < kDimension; jj++) {
+      double forward;
+      parameters[jj] += kEpsilon;
+      EXPECT_TRUE(cost.Evaluate(parameters, &forward, NULL));
+      parameters[jj] -= kEpsilon;
+
+      // Check that analytic and numeric derivatives agree.
+      EXPECT_NEAR(gradient[jj], (forward - objective) / kEpsilon, kMaxError);
+    }
+  }
+}
+
 // Sample points from a simple function and fit a GP model. Make sure that
 // after learning hyperparameters for an RBF kernel, the GP improves its
 // root mean squared error against a random set of points.
 TEST(GaussianProcess, TestLearnHyperparams) {
-  const size_t kNumTrainingPoints = 10;
+  const size_t kNumTrainingPoints = 100;
   const size_t kNumTestPoints = 100;
   const double kMaxRmsError = 0.01;
   const double kNoiseVariance = 0.0001;

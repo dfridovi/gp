@@ -187,16 +187,26 @@ namespace gp {
   // training data.
   bool GaussianProcess::LearnHyperparams() {
     // Create a Ceres problem.
-    TrainingLogLikelihood cost(points_, &targets_, kernel_, noise_);
-    ceres::GradientProblem problem(&cost);
+    TrainingLogLikelihood* cost =
+      new TrainingLogLikelihood(points_, &targets_, kernel_, noise_);
+    ceres::GradientProblem problem(cost);
+
+    // Create a parameter vector.
+    const VectorXd& kernel_params = kernel_->ImmutableParams();
+    double parameters[kernel_params.size()];
+    for (size_t ii = 0; ii < kernel_params.size(); ii++)
+      parameters[ii] = kernel_params(ii);
 
     // Set solver parameters.
     ceres::GradientProblemSolver::Summary summary;
     ceres::GradientProblemSolver::Options options;
     options.minimizer_progress_to_stdout = true;
-    options.max_num_line_search_step_size_iterations = 50;
+    options.max_num_line_search_step_size_iterations = 500;
     options.max_num_line_search_direction_restarts = 10;
-    ceres::Solve(options, problem, kernel_->Params().data(), &summary);
+    //    options.line_search_type = ceres::ARMIJO;
+    //    options.line_search_direction_type = ceres::NONLINEAR_CONJUGATE_GRADIENT;
+
+    ceres::Solve(options, problem, parameters, &summary);
 
     return summary.IsSolutionUsable();
   }

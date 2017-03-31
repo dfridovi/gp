@@ -95,8 +95,13 @@ namespace gp {
 
       logdet *= 2.0;
 
-      // Evaluate cost.
-      *cost = targets_->dot(regressed) + logdet;
+      // Evaluate cost. Add a log barrier so that parameters don't go negative.
+      double barrier = 0.0;
+      const double kBarrierScaling = 1e-3;
+      for (size_t ii = 0; ii < NumParameters(); ii++)
+        barrier -= std::log(kBarrierScaling * parameters[ii]);
+
+      *cost = targets_->dot(regressed) + logdet + barrier;
 
       // Maybe compute gradient.
       if (gradient) {
@@ -114,7 +119,9 @@ namespace gp {
             }
           }
 
-          gradient[ii] = llt.solve(dK).trace() - regressed.dot(dK * regressed);
+          // Compute the gradient. Must add the gradient of the log barrier.
+          gradient[ii] = llt.solve(dK).trace() - regressed.dot(dK * regressed) -
+            1.0 / parameters[ii];
         }
       }
 

@@ -34,60 +34,60 @@
  * Authors: David Fridovich-Keil   ( dfk@eecs.berkeley.edu )
  */
 
-///////////////////////////////////////////////////////////////////////////////
-//
-// Defines the Kernel base class. The kernel is what tells the GP how much
-// the underyling function value depends on each training point. Common kernels
-// include the squared exponential or RBF and the Matern class.
-//
-///////////////////////////////////////////////////////////////////////////////
-
-#ifndef GP_KERNEL_H
-#define GP_KERNEL_H
-
-#include "types.hpp"
+#include <rbf_kernel.hpp>
+#include <types.hpp>
 
 #include <glog/logging.h>
-#include <memory>
+#include <gtest/gtest.h>
+#include <random>
+#include <vector>
+#include <math.h>
 
 namespace gp {
 
-  class Kernel {
-  public:
-    // Typedefs.
-    typedef std::shared_ptr<Kernel> Ptr;
-    typedef std::shared_ptr<const Kernel> ConstPtr;
+namespace test {
 
-    // Destructor.
-    virtual ~Kernel() {}
+// Make sure that the kernel partial derivatives are correct.
+TEST(RbfKernel, TestPartials) {
+  const double kMaxError = 1e-8;
+  const double kEpsilon = 1e-8;
+  const size_t kDimension = 10;
+  const size_t kNumTests = 10;
 
-    // Pure virtual methods to be implemented in a derived class.
-    virtual double Evaluate(const VectorXd& x, const VectorXd& y) const = 0;
-    virtual double Partial(const VectorXd& x, const VectorXd& y,
-                           size_t ii) const = 0;
-    virtual void Gradient(const VectorXd& x, const VectorXd& y,
-                          VectorXd& gradient) const = 0;
+  // Random number generator.
+  std::random_device rd;
+  std::default_random_engine rng(rd());
+  std::uniform_real_distribution<double> unif(0.0, 1.0);
 
-    // Access and reset params.
-    VectorXd& Params() { return params_; }
-    const VectorXd& ImmutableParams() const { return params_; }
-    void Reset(const VectorXd& params) {
-      CHECK_EQ(params_.size(), params.size());
-      params_ = params;
+  // Create a kernel.
+  VectorXd lengths(kDimension);
+  for (size_t ii = 0; ii < kDimension; ii++)
+    lengths(ii) = unif(rng);
+
+  const Kernel::Ptr kernel = RbfKernel::Create(lengths);
+
+  // Check that the partial derivative in each dimension is correct.
+  for (size_t ii = 0; ii < kDimension; ii++) {
+    for (size_t jj = 0; jj < kNumTests; jj++) {
+      const VectorXd x = VectorXd::Random(kDimension);
+      const VectorXd y = VectorXd::Random(kDimension);
+
+      // Compute analytic derivative.
+      const double analytic = kernel->Partial(x, y, ii);
+
+      // Compute numerical derivative.
+      kernel->Adjust(kEpsilon, ii);
+      const double forward = kernel->Evaluate(x, y);
+
+      kernel->Adjust(-2.0 * kEpsilon, ii);
+      const double backward = kernel->Evaluate(x, y);
+
+      kernel->Adjust(kEpsilon, ii);
+      EXPECT_NEAR(analytic, (forward - backward) / (2.0 * kEpsilon), kMaxError);
     }
-    void Adjust(double diff, size_t ii) {
-      CHECK_LT(ii, params_.size());
-      params_(ii) += diff;
-    }
+  }
+}
 
-  protected:
-    explicit Kernel(const VectorXd& params)
-      : params_(params) {}
+} //\namespace test
 
-    // Parameter vector.
-    VectorXd params_;
-  }; //\class Kernel
-
-}  //\namespace gp
-
-#endif
+} //\namespace gp
