@@ -50,7 +50,7 @@ namespace gp {
 namespace test {
 // A simple function (quadratic with lots of bumps) on the interval [0, 1].
 double f(double x) {
-  return -0.125 + (x - 0.5) * (x - 0.5) + 0.0 * std::sin(2.0 * M_PI * 10.0 * x);
+  return -0.125 + (x - 0.5) * (x - 0.5) + 0.1 * std::sin(2.0 * M_PI * 10.0 * x);
 }
 
 // Check that the gradient computation in TrainingLogLikelihood is correct.
@@ -118,7 +118,7 @@ TEST(TrainingLogLikelihood, TestGradient) {
 TEST(GaussianProcess, TestLearnHyperparams) {
   const size_t kNumTrainingPoints = 100;
   const size_t kNumTestPoints = 10;
-  const double kMaxRmsError = 0.3;
+  const double kMaxRmsError = 0.01;
   const double kNoiseVariance = 1e-8;
 
   // Random number generator.

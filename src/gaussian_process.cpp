@@ -212,6 +212,14 @@ namespace gp {
     for (size_t ii = 0; ii < kernel_params.size(); ii++)
       kernel_params(ii) = parameters[ii];
 
+    // Recompute covariance, cholesky, and regressed targets.
+    Covariance();
+
+    llt_.compute(covariance_.topLeftCorner(points_->size(), points_->size()));
+
+    regressed_.head(points_->size()) =
+      llt_.solve(targets_.head(points_->size()));
+
     return summary.IsSolutionUsable();
   }
 
