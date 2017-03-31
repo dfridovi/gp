@@ -52,6 +52,7 @@ namespace gp {
                                    size_t dimension, size_t max_points)
     : kernel_(kernel),
       noise_(noise),
+      dimension_(dimension),
       points_(new std::vector<VectorXd>),
       max_points_(max_points),
       targets_(max_points),
@@ -59,7 +60,7 @@ namespace gp {
       covariance_(max_points, max_points) {
     CHECK_NOTNULL(kernel_.get());
     CHECK_GE(max_points_, 1);
-    CHECK_GE(dimension, 1);
+    CHECK_GE(dimension_, 1);
     CHECK_GT(noise_, 0.0);
 
     // Random number generator.
@@ -73,7 +74,7 @@ namespace gp {
     for (size_t ii = 0; ii < max_points / 10 + 1; ii++) {
       VectorXd x(dimension);
 
-      for (size_t jj = 0; jj < dimension; jj++)
+      for (size_t jj = 0; jj < dimension_; jj++)
         x(jj) = unif(rng);
 
       points_->push_back(x);
@@ -95,6 +96,7 @@ namespace gp {
                                    const PointSet& points, size_t max_points)
     : kernel_(kernel),
       noise_(noise),
+      dimension_(0),
       points_(points),
       max_points_(max_points),
       targets_(max_points),
@@ -102,9 +104,13 @@ namespace gp {
       covariance_(max_points, max_points) {
     CHECK_NOTNULL(kernel_.get());
     CHECK_NOTNULL(points_.get());
+    CHECK_GE(points_->size(), 1);
     CHECK_GE(max_points_, 1);
     CHECK_LE(points_->size(), max_points_);
     CHECK_GT(noise_, 0.0);
+
+    // Set dimension.
+    dimension_ = points_->at(0).size();
 
     // Random number generator.
     std::random_device rd;
@@ -139,9 +145,13 @@ namespace gp {
       covariance_(max_points, max_points) {
     CHECK_NOTNULL(kernel_.get());
     CHECK_GE(max_points_, 1);
+    CHECK_GE(points_->size(), 1);
     CHECK_LE(points_->size(), max_points_);
     CHECK_EQ(points_->size(), targets.size());
     CHECK_GT(noise_, 0.0);
+
+    // Set dimension.
+    dimension_ = points_->at(0).size();
 
     // Set 'targets_'.
     targets_.head(points_->size()) = targets;

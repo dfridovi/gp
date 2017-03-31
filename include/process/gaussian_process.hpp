@@ -80,6 +80,7 @@ namespace gp {
     const MatrixXd& ImmutableCovariance() const { return covariance_; }
     const VectorXd& ImmutableRegressedTargets() const { return regressed_; }
     const Eigen::LLT<MatrixXd>& ImmutableCholesky() const { return llt_; }
+    size_t Dimension() const { return dimension_; }
 
   private:
     // Compute the covariance and cross covariance against the training points.
@@ -94,6 +95,7 @@ namespace gp {
 
     // Training points, targets, and regressed targets (inv(cov) * targets).
     const PointSet points_;
+    size_t dimension_;
     VectorXd targets_;
     VectorXd regressed_;
 

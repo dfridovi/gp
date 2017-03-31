@@ -38,12 +38,27 @@
 #include <process/gaussian_process.hpp>
 #include <optimization/cost_functors.hpp>
 #include <utils/types.hpp>
+#include <utils/plot_1d.hpp>
 
 #include <glog/logging.h>
 #include <gtest/gtest.h>
+#include <gflags/gflags.h>
 #include <random>
 #include <vector>
 #include <math.h>
+
+
+#ifdef SYSTEM_OSX
+#include <GLUT/glut.h>
+#endif
+
+#ifdef SYSTEM_LINUX
+#include <GL/glew.h>
+#include <GL/glut.h>
+#endif
+
+//DEFINE_bool(visualize, false, "Visualize results of tests.");
+bool FLAGS_visualize;
 
 namespace gp {
 
@@ -52,6 +67,21 @@ namespace test {
 double f(double x) {
   return -0.125 + (x - 0.5) * (x - 0.5) + 0.1 * std::sin(2.0 * M_PI * 10.0 * x);
 }
+
+namespace learn_hyperparams {
+  Plot1D* plot = NULL;
+
+  // GLUT functions.
+  void display() {
+    CHECK_NOTNULL(plot);
+    plot->display();
+  }
+
+  void reshape(int w, int h) {
+    CHECK_NOTNULL(plot);
+    plot->reshape(w, h);
+  }
+} //\ namespace learn_hyperparameters
 
 // Check that the gradient computation in TrainingLogLikelihood is correct.
 TEST(TrainingLogLikelihood, TestGradient) {
@@ -161,6 +191,20 @@ TEST(GaussianProcess, TestLearnHyperparams) {
 
   EXPECT_LE(std::sqrt(squared_error / static_cast<double>(kNumTestPoints)),
             kMaxRmsError);
+
+  // Maybe visualize.
+  if (FLAGS_visualize) {
+    // Create a new plot.
+    learn_hyperparams::plot = new Plot1D(&gp, 0.0, 1.0, -1.0, 1.0, 100);
+
+    // Visualize.
+    glutCreateWindow(100, 100, 400, 300);
+    glutDisplayFunc( learn_hyperparams::display );
+    glutReshapeFunc( learn_hyperparams::reshape );
+    glutMainLoop();
+
+    delete learn_hyperparams::plot;
+  }
 }
 
 } //\namespace test
