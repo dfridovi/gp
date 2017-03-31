@@ -97,7 +97,7 @@ namespace gp {
 
       // Evaluate cost. Add a log barrier so that parameters don't go negative.
       double barrier = 0.0;
-      const double kBarrierScaling = 1e-3;
+      const double kBarrierScaling = 1e3;
       for (size_t ii = 0; ii < NumParameters(); ii++)
         barrier -= std::log(kBarrierScaling * parameters[ii]);
 

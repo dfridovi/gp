@@ -192,7 +192,7 @@ namespace gp {
     ceres::GradientProblem problem(cost);
 
     // Create a parameter vector.
-    const VectorXd& kernel_params = kernel_->ImmutableParams();
+    VectorXd& kernel_params = kernel_->Params();
     double parameters[kernel_params.size()];
     for (size_t ii = 0; ii < kernel_params.size(); ii++)
       parameters[ii] = kernel_params(ii);
@@ -207,6 +207,10 @@ namespace gp {
     //    options.line_search_direction_type = ceres::NONLINEAR_CONJUGATE_GRADIENT;
 
     ceres::Solve(options, problem, parameters, &summary);
+
+    // Store the parameters back in the kernel.
+    for (size_t ii = 0; ii < kernel_params.size(); ii++)
+      kernel_params(ii) = parameters[ii];
 
     return summary.IsSolutionUsable();
   }
