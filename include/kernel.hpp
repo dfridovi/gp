@@ -62,7 +62,11 @@ namespace gp {
     virtual ~Kernel() {}
 
     // Pure virtual methods to be implemented in a derived class.
-    virtual double Evaluate(const VectorXd& x, const VectorXd& y) const;
+    virtual double Evaluate(const VectorXd& x, const VectorXd& y) const = 0;
+    virtual double Partial(const VectorXd& x, const VectorXd& y,
+                           size_t ii) const = 0;
+    virtual void Gradient(const VectorXd& x, const VectorXd& y,
+                          VectorXd& gradient) const = 0;
 
     // Access and reset params.
     VectorXd& Params() { return params_; }

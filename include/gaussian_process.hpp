@@ -76,6 +76,11 @@ namespace gp {
     // training data.
     bool LearnHyperparams();
 
+    // Immutable accessors for computed information (not input to the GP).
+    const MatrixXd& ImmutableCovariance() const { return covariance_; }
+    const VectorXd& ImmutableRegressedTargets() const { return regressed_; }
+    const Eigen::LLT<MatrixXd>& ImmutableCholesky() const { return llt_; }
+
   private:
     // Compute the covariance and cross covariance against the training points.
     void Covariance();

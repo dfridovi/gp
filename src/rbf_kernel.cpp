@@ -64,4 +64,30 @@ namespace gp {
     return std::exp(-0.5 * diff.cwiseQuotient(params_).squaredNorm());
   }
 
+  double RbfKernel::Partial(const VectorXd& x, const VectorXd& y,
+                            size_t ii) const {
+    CHECK_LT(ii, params_.size());
+    const VectorXd diff = x - y;
+
+    // Evaluate the kernel.
+    const double kernel =
+      std::exp(-0.5 * diff.cwiseQuotient(params_).squaredNorm());
+
+    return kernel * diff(ii) * diff(ii) /
+      (params_(ii) * params_(ii) * params_(ii));
+  }
+
+  void RbfKernel::Gradient(const VectorXd& x, const VectorXd& y,
+                           VectorXd& gradient) const {
+    const VectorXd diff = x - y;
+
+    // Evaluate the kernel.
+    const double kernel =
+      std::exp(-0.5 * diff.cwiseQuotient(params_).squaredNorm());
+
+    gradient = kernel * diff.cwiseProduct(diff).cwiseQuotient(
+      params_.cwiseProduct(params_).cwiseProduct(params_));
+  }
+
+
 }  //\namespace gp

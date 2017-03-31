@@ -52,18 +52,11 @@
 namespace gp {
 
   // Compute twice the negative log-likelihood of the training data of a GP
-  // and the gradient against all the parameters of the kernel. Since this is
-  // set up as a least squares problem, we actually compute residuals. Each
-  // training point contributes two residuals: (1) is from the normalization
-  // (related to its variance) and (2) is essentially the z-score.
-  struct TrainingLogLikelihood {
+  // and the gradient against all the parameters of the kernel.
+  class TrainingLogLikelihood : public ceres::FirstOrderFunction {
+  public:
     // Inputs: training points, training targets, kernel, and noise.
     // Optimization variables: kernel parameters.
-    const PointSet points_;
-    const VectorXd* targets_;
-    const Kernel::Ptr kernel_;
-    const double noise_;
-
     TrainingLogLikelihood(const PointSet& points,
                           const VectorXd* targets,
                           const Kernel::Ptr& kernel,
@@ -71,35 +64,7 @@ namespace gp {
       : points_(points),
         targets_(targets),
         kernel_(kernel),
-        noise_(noise) {}
-
-    template <typename T>
-    bool operator()(T const* const* params, T* resids) const {
-      // First, create a new GP model using this set of parameters.
-      // Parameters are already stored in the kernel!
-      GaussianProcess gp(kernel_, noise_,
-                         points_, *targets_, targets_->size());
-
-      // Compute residuals. As above, each training point contributes
-      // two residuals:
-      // (1) sqrt(log(2pi * var(points_[ii])))
-      // (2) (mu(points_[ii]) - targets_[ii]) / sqrt(var(points_[ii]))
-      double mean, variance;
-      for (size_t ii = 0; ii < points_->size(); ii++) {
-        gp.EvaluateTrainingPoint(ii, mean, variance);
-        resids[2 * ii] += static_cast<T>(std::sqrt(std::log(2.0 * M_PI * variance)));
-        resids[2 * ii + 1] = static_cast<T>((mean - targets_->operator()(ii)) /
-                                            std::sqrt(variance));
-      }
-
-      return true;
-    }
-
-    // Factory method.
-    static ceres::CostFunction* Create(const PointSet& points,
-                                       const VectorXd* targets,
-                                       const Kernel::Ptr& kernel,
-                                       double noise) {
+        noise_(noise) {
       CHECK_NOTNULL(targets);
       CHECK_NOTNULL(points.get());
       CHECK_NOTNULL(kernel.get());
@@ -107,24 +72,67 @@ namespace gp {
       CHECK_EQ(points->size(), targets->size());
       CHECK_GE(points->size(), 1);
       CHECK_GT(noise, 0.0);
-
-      // Number of residuals is twice the number of points.
-      const int kNumResiduals = 2 * points->size();
-
-      // Number of parameters is given by the kernel.
-      const int kNumParameters = static_cast<int>(kernel->Params().size());
-
-      // Stride. Number of derivatives to calculate. See below for details:
-      // http://ceres-solver.org/nnls_modeling.html#dynamicautodiffcostfunction
-      const int kStride = 4;
-
-      ceres::DynamicAutoDiffCostFunction<TrainingLogLikelihood, kStride>* cost =
-        new ceres::DynamicAutoDiffCostFunction<TrainingLogLikelihood, kStride>(
-          new TrainingLogLikelihood(points, targets, kernel, noise));
-      cost->AddParameterBlock(kNumParameters);
-      cost->SetNumResiduals(kNumResiduals);
-      return cost;
     }
+
+    // Evaluate objective function and gradient. For details please see
+    // R&W, pg. 113/4, eqs. 5.8/9. For simplicity we leave off the constant.
+    bool Evaluate(const double* const parameters,
+                  double* cost, double* gradient) const {
+      // Update the kernel.
+      for (size_t ii = 0; ii < NumParameters(); ii++)
+        kernel_->Params()(ii) = parameters[ii];
+
+      // Create a new GP model and extract computed variables.
+      GaussianProcess gp(kernel_, noise_, points_, *targets_, points_->size());
+      const Eigen::LLT<MatrixXd>& llt = gp.ImmutableCholesky();
+      const VectorXd& regressed = gp.ImmutableRegressedTargets();
+      const MatrixXd& L = llt.matrixL();
+
+      // Compute log det of covariance matrix.
+      double logdet = 0.0;
+      for (size_t ii = 0; ii < L.rows(); ii++)
+        logdet += std::log(L(ii, ii));
+
+      logdet *= 2.0;
+
+      // Evaluate cost.
+      *cost = targets_->dot(regressed) + logdet;
+
+      // Maybe compute gradient.
+      if (gradient) {
+        MatrixXd dK(points_->size(), points_->size());
+
+        for (size_t ii = 0; ii < NumParameters(); ii++) {
+          // Compute the derivative of covariance against the ii'th parameter.
+          for (size_t jj = 0; jj < points_->size(); jj++) {
+            dK(jj, jj) = kernel_->Partial(points_->at(jj), points_->at(jj), ii);
+
+            for (size_t kk = 0; kk < jj; kk++) {
+              dK(jj, kk) =
+                kernel_->Partial(points_->at(jj), points_->at(kk), ii);
+              dK(kk, jj) = dK(jj, kk);
+            }
+          }
+
+          gradient[ii] = llt.solve(dK).trace() - regressed.dot(dK * regressed);
+        }
+      }
+
+      return true;
+    }
+
+    // Number of parameters in the problem.
+    int NumParameters() const {
+      return static_cast<int>(kernel_->ImmutableParams().size());
+    }
+
+  private:
+    // Inputs: training points, training targets, kernel, and noise.
+    // Optimization variables: kernel parameters.
+    const PointSet points_;
+    const VectorXd* targets_;
+    const Kernel::Ptr kernel_;
+    const double noise_;
   }; // struct TrainingLogLikelihood
 
 } // namespace gp

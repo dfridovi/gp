@@ -187,28 +187,16 @@ namespace gp {
   // training data.
   bool GaussianProcess::LearnHyperparams() {
     // Create a Ceres problem.
-    ceres::Problem problem;
-    problem.AddResidualBlock(
-      TrainingLogLikelihood::Create(points_, &targets_, kernel_, noise_),
-      NULL, // Squared loss (no outlier rejection).
-      kernel_->Params().data()); // Direct access to kernel params.
+    TrainingLogLikelihood cost(points_, &targets_, kernel_, noise_);
+    ceres::GradientProblem problem(&cost);
 
-    // Assume all parameters are positive. This can be removed later,
-    // and at least for the RBF kernel it really shouldn't matter.
-    for (size_t ii = 0; ii < kernel_->Params().size(); ii++)
-      problem.SetParameterLowerBound(kernel_->Params().data(), ii, 0.0);
-
-    // Set up solver options.
-    ceres::Solver::Summary summary;
-    ceres::Solver::Options options;
-    options.linear_solver_type = ceres::DENSE_QR;
-    options.function_tolerance = 1e-16;
-    options.gradient_tolerance = 1e-16;
-    options.trust_region_strategy_type = ceres::LEVENBERG_MARQUARDT;
-
-    // Solve and return. Solution parameters are automatically stored in
-    // the kernel!
-    ceres::Solve(options, &problem, &summary);
+    // Set solver parameters.
+    ceres::GradientProblemSolver::Summary summary;
+    ceres::GradientProblemSolver::Options options;
+    options.minimizer_progress_to_stdout = true;
+    options.max_num_line_search_step_size_iterations = 50;
+    options.max_num_line_search_direction_restarts = 10;
+    ceres::Solve(options, problem, kernel_->Params().data(), &summary);
 
     return summary.IsSolutionUsable();
   }

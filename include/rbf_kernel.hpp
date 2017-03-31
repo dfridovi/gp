@@ -56,6 +56,9 @@ namespace gp {
 
     // Pure virtual methods to be implemented in a derived class.
     double Evaluate(const VectorXd& x, const VectorXd& y) const;
+    double Partial(const VectorXd& x, const VectorXd& y, size_t ii) const;
+    void Gradient(const VectorXd& x, const VectorXd& y,
+                  VectorXd& gradient) const;
 
   private:
     explicit RbfKernel(const VectorXd& lengths);
