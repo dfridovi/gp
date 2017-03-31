@@ -7,9 +7,9 @@ include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
 list(APPEND gp_LIBRARIES ${EIGEN3_LIBRARIES})
 
 # Find matplotpp.
-find_package( matplotpp REQUIRED )
-include_directories(SYSTEM ${MATPLOTPP_INCLUDE_DIR})
-list(APPEND gp_LIBRARIES ${MATPLOTPP_LIBRARIES})
+#find_package( matplotpp REQUIRED )
+#include_directories(SYSTEM ${MATPLOTPP_INCLUDE_DIR})
+#list(APPEND gp_LIBRARIES ${MATPLOTPP_LIBRARIES})
 
 # Find OpenGL.
 find_package( OpenGL REQUIRED )

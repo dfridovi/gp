@@ -91,8 +91,8 @@ namespace gp {
 
       // Plot.
       plot(x, mu); set("r");
-      plot(x, upper); set("r:");
-      plot(x, lower); set("r:");
+      plot(x, upper); set("b:");
+      plot(x, lower); set("b:");
     }
 
   private:

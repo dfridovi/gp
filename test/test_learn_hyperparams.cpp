@@ -58,7 +58,7 @@
 #endif
 
 //DEFINE_bool(visualize, false, "Visualize results of tests.");
-bool FLAGS_visualize;
+bool FLAGS_visualize = true;
 
 namespace gp {
 
@@ -149,7 +149,7 @@ TEST(GaussianProcess, TestLearnHyperparams) {
   const size_t kNumTrainingPoints = 100;
   const size_t kNumTestPoints = 10;
   const double kMaxRmsError = 0.01;
-  const double kNoiseVariance = 1e-8;
+  const double kNoiseVariance = 1e-4;
 
   // Random number generator.
   std::random_device rd;
@@ -195,7 +195,7 @@ TEST(GaussianProcess, TestLearnHyperparams) {
   // Maybe visualize.
   if (FLAGS_visualize) {
     // Create a new plot.
-    learn_hyperparams::plot = new Plot1D(&gp, 0.0, 1.0, -1.0, 1.0, 100);
+    learn_hyperparams::plot = new Plot1D(&gp, 0.0, 1.0, -1.0, 1.0, 1000);
 
     // Visualize.
     glutCreateWindow(100, 100, 400, 300);

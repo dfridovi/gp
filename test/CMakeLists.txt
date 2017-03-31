@@ -20,7 +20,7 @@ if (BUILD_TESTS)
     message("Including test   \"${BoldBlue}${test_no_ext}${ColorReset}\".")
   endforeach()
   add_executable(${test_target} ${test_srcs})
-  target_link_libraries(${test_target} gp ${gp_LIBRARIES} gtest)
+  target_link_libraries(${test_target} gp ${gp_LIBRARIES} gtest matplotpp)
   add_test(${test_target} ${test_target})
   gp_set_runtime_directory(${test_target} ${PROJECT_BINARY_DIR})
 
