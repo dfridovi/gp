@@ -33,6 +33,7 @@ install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo update-alternatives --config gcc; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo update-alternatives --config g++; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install freeglut3 freeglut3-dev; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libglew-dev; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install binutils-gold; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libxmu-dev libxi-dev; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libboost-all-dev; fi

@@ -95,7 +95,7 @@ namespace gp {
       }
 
       // Plot.
-      plot(x, mu); set(2); set("b");
+      plot(x, mu); set(2); set("p");
       plot(x, upper); set(2); set("r"); set(":");
       plot(x, lower); set(2); set("r"); set(":");
 
