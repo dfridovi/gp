@@ -59,6 +59,7 @@ typedef ::Eigen::VectorXd VectorXd;
 // --------------- Internal typedefs and constants --------------- //
 
 typedef std::shared_ptr< std::vector<VectorXd> > PointSet;
+typedef std::shared_ptr< const std::vector<VectorXd> > ConstPointSet;
 
 }  //\namespace gp
 

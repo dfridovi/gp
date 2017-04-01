@@ -76,9 +76,11 @@ namespace gp {
     // training data.
     bool LearnHyperparams();
 
-    // Immutable accessors for computed information (not input to the GP).
+    // Immutable accessors.
     const MatrixXd& ImmutableCovariance() const { return covariance_; }
     const VectorXd& ImmutableRegressedTargets() const { return regressed_; }
+    const VectorXd& ImmutableTargets() const { return targets_; }
+    const ConstPointSet ImmutablePoints() const { return points_; }
     const Eigen::LLT<MatrixXd>& ImmutableCholesky() const { return llt_; }
     size_t Dimension() const { return dimension_; }
 

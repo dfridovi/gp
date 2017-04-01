@@ -94,10 +94,23 @@ namespace gp {
         lower[ii] = mean - 2.0 * std::sqrt(variance);
       }
 
+      // Also unpack the GP training points.
+      const ConstPointSet points = gp_->ImmutablePoints();
+      const VectorXd targets = gp_->ImmutableTargets();
+      CHECK_EQ(points->size(), targets.size());
+
+      std::vector<double> training_x(points->size());
+      std::vector<double> training_y(points->size());
+      for (size_t ii = 0; ii < points->size(); ii++) {
+        training_x[ii] = points->at(ii)(0);
+        training_y[ii] = targets(ii);
+      }
+
       // Plot.
-      plot(x, mu); set(2); set("b");
+      plot(x, mu); set(2); set("g");
       plot(x, upper); set(2); set("r"); set(":");
       plot(x, lower); set(2); set("r"); set(":");
+      plot(training_x, training_y); set(3); set("p"); set("*");
 
       axis(xmin_, xmax_, ymin_, ymax_);
 
