@@ -1,0 +1,62 @@
+\href{https://travis-ci.org/dfridovi/gp}{\tt } \href{https://github.com/dfridovi/gp/blob/master/LICENSE}{\tt }
+
+A homebrewed C++ library for Gaussian processes. {\bfseries gp} is developed by \href{http://people.eecs.berkeley.edu/~dfk/}{\tt David Fridovich-\/\+Keil}, a second-\/year PhD student in the Berkeley \href{http://hybrid.eecs.berkeley.edu}{\tt Hybrid Systems Lab} and the \href{http://bair.berkeley.edu}{\tt Berkeley Artificial Intelligence Research (B\+A\+IR) Lab}.
+
+\subsection*{Status}
+
+{\bfseries gp} is still under active development. I hope to have a first release soon though, so stay tuned!
+
+\subsection*{Structure}
+
+All source code is located in {\ttfamily src/}; headers are in {\ttfamily include/}; unit tests are in {\ttfamily /test/}; and executables are in {\ttfamily exec/}. Compiled binaries will be placed in {\ttfamily bin/}.
+
+\subsection*{Dependencies}
+
+I may miss a few here, but here is a list of dependencies\+:
+
+
+\begin{DoxyItemize}
+\item \href{http://eigen.tuxfamily.org/dox/}{\tt Eigen} (header-\/only linear algebra library)
+\item Gflags (Google\textquotesingle{}s command-\/line flag manager)
+\item Glog (Google\textquotesingle{}s logging tool)
+\end{DoxyItemize}
+
+All of these may be installed very easily. If you run into any trouble, though, I am more than happy to help you figure out what\textquotesingle{}s going on. Just post an \href{https://github.com/dfridovi/gp/issues}{\tt issue} on this repository and I will reply as soon as possible.
+
+\subsection*{Usage}
+
+You\textquotesingle{}ll need to begin by building the repository. From the top directory, type the following sequence of commands\+:
+
+
+\begin{DoxyCode}
+mkdir bin
+mkdir build
+cd build
+cmake ..
+make -j4
+\end{DoxyCode}
+
+
+This should build all tests and executables. In order to run tests, you can run the following command\+:
+
+
+\begin{DoxyCode}
+./run\_tests
+\end{DoxyCode}
+
+
+from within the {\ttfamily build/} directory you just made. All the tests should pass, and none should take more than a second or so to run.
+
+Executables are automatically placed within the {\ttfamily bin/} directory that you created. To run them, just type {\ttfamily ./(name-\/of-\/executable)}.
+
+To the extent that it makes sense, all parameters are accessible from the command line via Gflags. For help with command line options, simply run the following command\+:
+
+
+\begin{DoxyCode}
+./(name-of-executable) --help
+\end{DoxyCode}
+
+
+\subsection*{A\+PI documentation}
+
+I\textquotesingle{}ve been using Doxygen to auto-\/generate web-\/based \href{https://dfridovi.github.io/gp/documentation/html/}{\tt documentation}. Although I do not follow the Doxygen guidelines for writing comments, auto-\/generation still seems to do a fairly reasonable job. 
