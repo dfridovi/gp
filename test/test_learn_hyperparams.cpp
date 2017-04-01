@@ -53,6 +53,7 @@
 #endif
 
 #ifdef SYSTEM_LINUX
+//#include <GL/glew.h>
 #include <GL/glut.h>
 #endif
 
@@ -168,7 +169,7 @@ TEST(TrainingLogLikelihood, TestGradient) {
 // root mean squared error against a random set of points.
 TEST(GaussianProcess, TestLearnHyperparams) {
   const size_t kNumTrainingPoints = 100;
-  const size_t kNumTestPoints = 10;
+  const size_t kNumTestPoints = 100;
   const double kMaxRmsError = 0.01;
   const double kNoiseVariance = 1e-4;
 
