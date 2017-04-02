@@ -193,8 +193,8 @@ namespace gp {
     variance = 1.0 - cross.dot(llt_.solve(cross));
   }
 
-  // Add a new point. Returns whether or not point was added (point will only
-  // be added if 'max_points' is not exceeded).
+  // Add new point(s). Returns whether or not points were added (points will
+  // only be added until 'max_points' is reached).
   bool GaussianProcess::Add(const VectorXd& x, double target) {
     const size_t N = points_->size();
 
@@ -221,6 +221,41 @@ namespace gp {
     }
 
     return false;
+  }
+
+  bool GaussianProcess::Add(const std::vector<VectorXd>& points,
+                            const VectorXd& targets) {
+    CHECK_EQ(points.size(), targets.size());
+    const bool has_room = points_->size() + points.size() <= max_points_;
+
+    // Add points one at a time.
+    for (size_t ii = 0; ii < points.size(); ii++) {
+      CHECK_EQ(points[ii].size(), dimension_);
+      const size_t N = points_->size();
+
+      if (N >= max_points_)
+        break;
+
+      // Add a row/column to the covariance matrix.
+      for (size_t jj = 0; jj < N; jj++) {
+        covariance_(jj, N) = kernel_->Evaluate(points[ii], points_->at(jj));
+        covariance_(N, jj) = covariance_(jj, N);
+      }
+
+      covariance_(N, N) = 1.0 + noise_;
+
+      // Add the new point/target.
+      targets_(N) = targets(ii);
+      points_->push_back(points[ii]);
+    }
+
+    // Recompute Cholesky decomposition and regressed targets.
+    llt_.compute(covariance_.topLeftCorner(points_->size(), points_->size()));
+
+    regressed_.head(points_->size()) =
+      llt_.solve(targets_.head(points_->size()));
+
+    return has_room;
   }
 
   // Learn kernel hyperparameters by maximizing the log-likelihood of the
