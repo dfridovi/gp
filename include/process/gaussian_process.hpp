@@ -72,6 +72,10 @@ namespace gp {
     void Evaluate(const VectorXd& x, double& mean, double& variance) const;
     void EvaluateTrainingPoint(size_t ii, double& mean, double& variance) const;
 
+    // Add a new point. Returns whether or not point was added (point will only
+    // be added if 'max_points' is not exceeded).
+    bool Add(const VectorXd& x, double target);
+
     // Learn kernel hyperparameters by maximizing log-likelihood of the
     // training data.
     bool LearnHyperparams();

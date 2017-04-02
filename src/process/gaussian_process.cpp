@@ -193,6 +193,36 @@ namespace gp {
     variance = 1.0 - cross.dot(llt_.solve(cross));
   }
 
+  // Add a new point. Returns whether or not point was added (point will only
+  // be added if 'max_points' is not exceeded).
+  bool GaussianProcess::Add(const VectorXd& x, double target) {
+    const size_t N = points_->size();
+
+    if (N < max_points_) {
+      CHECK_EQ(x.size(), dimension_);
+
+      // Add a row/column to the covariance matrix.
+      for (size_t ii = 0; ii < N; ii++) {
+        covariance_(ii, N) = kernel_->Evaluate(x, points_->at(ii));
+        covariance_(N, ii) = covariance_(ii, N);
+      }
+
+      covariance_(N, N) = 1.0 + noise_;
+
+      // Add the new point/target.
+      targets_(N) = target;
+      points_->push_back(x);
+
+      // Recompute Cholesky decomposition and regressed targets.
+      llt_.compute(covariance_.topLeftCorner(N + 1, N + 1));
+      regressed_.head(N + 1) = llt_.solve(targets_.head(N + 1));
+
+      return true;
+    }
+
+    return false;
+  }
+
   // Learn kernel hyperparameters by maximizing the log-likelihood of the
   // training data.
   bool GaussianProcess::LearnHyperparams() {
