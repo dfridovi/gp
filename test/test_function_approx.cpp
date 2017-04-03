@@ -71,12 +71,13 @@ TEST(GaussianProcess, TestFunctionApprox1D) {
   const size_t kNumTrainingPoints = 100;
   const size_t kNumTestPoints = 100;
   const double kMaxRmsError = 0.01;
-  const double kNoiseVariance = 1e-4;
-  const double kLength = 0.1;
+  const double kNoiseVariance = 1e-3;
+  const double kLength = 1.0;
 
   const size_t kBatchSize = 16;
-  const size_t kGradUpdates = 1000;
-  const double kStepSize = 0.5;
+  const size_t kGradUpdates = 10000;
+  const size_t kRelearnInterval = 2000;
+  const double kStepSize = 1.0;
 
   // Random number generator.
   std::random_device rd;
@@ -102,10 +103,14 @@ TEST(GaussianProcess, TestFunctionApprox1D) {
   std::vector<double> batch_targets;
   double mse = std::numeric_limits<double>::infinity();
   for (size_t ii = 0; ii < kGradUpdates; ii++) {
+    // Maybe relearn hyperparameters.
+    if (ii % kRelearnInterval == kRelearnInterval - 1)
+      EXPECT_TRUE(gp.LearnHyperparams());
+
+    // Get a random batch.
     batch_points.clear();
     batch_targets.clear();
 
-    // Get a random batch.
     for (size_t jj = 0; jj < kBatchSize; jj++) {
       const double x = unif(rng);
       batch_points.push_back(VectorXd::Constant(1, x));
@@ -116,7 +121,7 @@ TEST(GaussianProcess, TestFunctionApprox1D) {
     mse = gp.UpdateTargets(batch_points, batch_targets,
                            kStepSize, ii == kGradUpdates - 1);
 
-    if (FLAGS_verbose)
+    if (FLAGS_verbose && ii % 100 == 1)
       std::printf("MSE at step %zu was %5.3f.\n", ii, mse);
   }
 
@@ -136,7 +141,7 @@ TEST(GaussianProcess, TestFunctionApprox1D) {
   // Maybe visualize.
   if (FLAGS_visualize) {
     // Create a new plot.
-    plotting::plot = new Plot1D(&gp, 0.0, 1.0, -0.3, 0.3, 1000,
+    plotting::plot = new Plot1D(&gp, 0.0, 1.0, -0.5, 1.0, 1000,
                                 "Learned Hyperparameters");
 
     // Visualize.
