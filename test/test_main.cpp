@@ -49,6 +49,8 @@
 
 DEFINE_bool(visualize, false,
             "Visualize results of tests. Can only show one test at a time.");
+DEFINE_bool(verbose, false,
+            "Verbose test output");
 
 int main(int argc, char** argv) {
   std::string log_file = GP_TEST_DATA_DIR + std::string("/out.log");

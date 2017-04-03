@@ -40,6 +40,9 @@
 #include <utils/types.hpp>
 #include <utils/plot_1d.hpp>
 
+#include "test_functions.hpp"
+#include "test_plotting.hpp"
+
 #include <glog/logging.h>
 #include <gtest/gtest.h>
 #include <gflags/gflags.h>
@@ -60,50 +63,7 @@
 DECLARE_bool(visualize);
 
 namespace gp {
-
 namespace test {
-// A simple function (quadratic with lots of bumps) on the interval [0, 1].
-double f(double x) {
-  return -0.125 + (x - 0.5) * (x - 0.5) + 0.1 * std::sin(2.0 * M_PI * 5.0 * x);
-}
-
-namespace learn_hyperparams {
-  Plot1D* plot = NULL;
-
-  // GLUT functions.
-  void display() {
-    CHECK_NOTNULL(plot);
-    plot->display();
-  }
-
-  void reshape(int w, int h) {
-    CHECK_NOTNULL(plot);
-    plot->reshape(w, h);
-  }
-
-  void idle() { glutPostRedisplay(); usleep(10000); }
-
-  void mouse(int button, int state, int x, int y ){
-    CHECK_NOTNULL(plot);
-    plot->mouse(button, state, x, y);
-  }
-
-  void motion(int x, int y) {
-    CHECK_NOTNULL(plot);
-    plot->motion(x, y);
-  }
-
-  void passive(int x, int y) {
-    CHECK_NOTNULL(plot);
-    plot->passivemotion(x, y);
-  }
-
-  void keyboard(unsigned char key, int x, int y){
-    CHECK_NOTNULL(plot);
-    plot->keyboard(key, x, y);
-  }
-
-} //\ namespace learn_hyperparameters
 
 // Check that the gradient computation in TrainingLogLikelihood is correct.
 TEST(TrainingLogLikelihood, TestGradient) {
@@ -187,7 +147,7 @@ TEST(GaussianProcess, TestLearnHyperparams) {
     random_point(0) = unif(rng);
 
     points->push_back(random_point);
-    targets(ii) = f(random_point(0));
+    targets(ii) = BumpyParabola(random_point(0));
   }
 
   // Train a GP.
@@ -197,9 +157,6 @@ TEST(GaussianProcess, TestLearnHyperparams) {
 
   EXPECT_TRUE(gp.LearnHyperparams());
 
-  //  std::cout << "Length: "
-  //            << kernel->ImmutableParams().transpose() << std::endl;
-
   // Test that we have approximated the function well.
   double squared_error = 0.0;
   double mean, variance;
@@ -208,7 +165,9 @@ TEST(GaussianProcess, TestLearnHyperparams) {
     test_point(0) = unif(rng);
 
     gp.Evaluate(test_point, mean, variance);
-    squared_error += (mean - f(test_point(0))) * (mean - f(test_point(0)));
+    squared_error +=
+      (mean - BumpyParabola(test_point(0))) *
+      (mean - BumpyParabola(test_point(0)));
   }
 
   EXPECT_LE(std::sqrt(squared_error / static_cast<double>(kNumTestPoints)),
@@ -217,24 +176,23 @@ TEST(GaussianProcess, TestLearnHyperparams) {
   // Maybe visualize.
   if (FLAGS_visualize) {
     // Create a new plot.
-    learn_hyperparams::plot = new Plot1D(&gp, 0.0, 1.0, -0.3, 0.3, 1000,
-                                         "Learned Hyperparameters");
+    plotting::plot = new Plot1D(&gp, 0.0, 1.0, -0.3, 0.3, 1000,
+                                "Learned Hyperparameters");
 
     // Visualize.
     glutCreateWindow(100, 100, 400, 300);
-    glutDisplayFunc(learn_hyperparams::display);
-    glutReshapeFunc(learn_hyperparams::reshape);
-    glutIdleFunc(learn_hyperparams::idle);
-    glutMotionFunc(learn_hyperparams::motion);
-    glutMouseFunc(learn_hyperparams::mouse);
-    glutPassiveMotionFunc(learn_hyperparams::passive);
-    glutKeyboardFunc(learn_hyperparams::keyboard);
+    glutDisplayFunc(plotting::display);
+    glutReshapeFunc(plotting::reshape);
+    glutIdleFunc(plotting::idle);
+    glutMotionFunc(plotting::motion);
+    glutMouseFunc(plotting::mouse);
+    glutPassiveMotionFunc(plotting::passive);
+    glutKeyboardFunc(plotting::keyboard);
     glutMainLoop();
 
-    delete learn_hyperparams::plot;
+    delete plotting::plot;
   }
 }
 
 } //\namespace test
-
 } //\namespace gp
