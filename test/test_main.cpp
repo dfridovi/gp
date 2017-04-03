@@ -55,11 +55,12 @@ DEFINE_bool(verbose, false,
 int main(int argc, char** argv) {
   std::string log_file = GP_TEST_DATA_DIR + std::string("/out.log");
   google::SetLogDestination(0, log_file.c_str());
+  google::InitGoogleLogging(argv[0]);
+  ::testing::InitGoogleTest(&argc, argv);
+
   google::ParseCommandLineFlags(&argc, &argv, true);
   FLAGS_logtostderr = true;
   FLAGS_minloglevel = 1;
-  google::InitGoogleLogging(argv[0]);
-  ::testing::InitGoogleTest(&argc, argv);
   LOG(INFO) << "Running all tests.";
 
   // Maybe initialize glut.
