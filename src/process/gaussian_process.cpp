@@ -223,6 +223,8 @@ namespace gp {
     return false;
   }
 
+  // Add new point(s). Returns whether or not points were added (points will
+  // only be added until 'max_points' is reached).
   bool GaussianProcess::Add(const std::vector<VectorXd>& points,
                             const VectorXd& targets) {
     CHECK_EQ(points.size(), targets.size());
@@ -257,6 +259,53 @@ namespace gp {
 
     return has_room;
   }
+
+  // Update the training targets in the direction of the gradient of the
+  // mean squared error at the given points. Returns the mean squared error.
+  // If 'finalize' is set, computes regressed targets - only set to false if
+  // you are doing repeated updates, and be sure to set true on final update.
+  double GaussianProcess::UpdateTargets(const std::vector<VectorXd>& points,
+                                        const std::vector<double>& targets,
+                                        double step_size, bool finalize) {
+    CHECK_EQ(points.size(), targets.size());
+
+    // Initialize 'mse' and 'grad' to zero.
+    double mse = 0.0;
+    VectorXd grad(VectorXd::Zero(targets_.size()));
+
+    // Accumulate across all points/targets.
+    VectorXd cross(points_->size());
+    VectorXd regressed_cross(points_->size());
+    for (size_t ii = 0; ii < points.size(); ii++) {
+      // Get the cross covariance against the training points.
+      CrossCovariance(points[ii], cross);
+
+      // Compute regressed cross covariance.
+      regressed_cross = llt_.solve(cross);
+
+      // Compute error and accumulate MSE and gradient.
+      const double error =
+        regressed_cross.dot(targets_.head(points_->size())) - targets[ii];
+
+      mse += error * error;
+      grad += error * regressed_cross;
+    }
+
+    // Tack on constants.
+    mse /= static_cast<double>(points.size());
+    grad *= 2.0 / static_cast<double>(points.size());
+
+    // Gradient update.
+    targets_.head(points_->size()) -= step_size * grad;
+
+    // Maybe update regressed targets.
+    if (finalize)
+      regressed_.head(points_->size()) =
+        llt_.solve(targets_.head(points_->size()));
+
+    return mse;
+  }
+
 
   // Learn kernel hyperparameters by maximizing the log-likelihood of the
   // training data.

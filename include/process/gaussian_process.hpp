@@ -77,6 +77,14 @@ namespace gp {
     bool Add(const VectorXd& x, double target);
     bool Add(const std::vector<VectorXd>& points, const VectorXd& targets);
 
+    // Update the training targets in the direction of the gradient of the
+    // mean squared error at the given points. Returns the mean squared error.
+    // If 'finalize' is set, computes regressed targets - only set to false if
+    // you are doing repeated updates, and be sure to set true on final update.
+    double UpdateTargets(const std::vector<VectorXd>& points,
+                         const std::vector<double>& targets,
+                         double step_size, bool finalize = true);
+
     // Learn kernel hyperparameters by maximizing log-likelihood of the
     // training data.
     bool LearnHyperparams();
