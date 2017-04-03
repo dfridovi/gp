@@ -64,7 +64,7 @@ namespace gp {
 namespace test {
 // A simple function (quadratic with lots of bumps) on the interval [0, 1].
 double f(double x) {
-  return -0.125 + (x - 0.5) * (x - 0.5) + 0.1 * std::sin(2.0 * M_PI * 10.0 * x);
+  return -0.125 + (x - 0.5) * (x - 0.5) + 0.1 * std::sin(2.0 * M_PI * 5.0 * x);
 }
 
 namespace learn_hyperparams {

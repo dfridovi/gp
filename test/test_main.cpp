@@ -43,7 +43,7 @@
 #endif
 
 #ifdef SYSTEM_LINUX
-#include <GL/glew.h>
+//#include <GL/glew.h>
 #include <GL/glut.h>
 #endif
 
