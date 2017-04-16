@@ -88,6 +88,15 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>Evaluate</b> (const V
 <tr class="memitem:a2594af50120c38f7c3d4dd894fb07d32"><td class="memItemLeft" align="right" valign="top"><a id="a2594af50120c38f7c3d4dd894fb07d32"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>EvaluateTrainingPoint</b> (size_t ii, double &amp;mean, double &amp;variance) const</td></tr>
 <tr class="separator:a2594af50120c38f7c3d4dd894fb07d32"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5fa3ef492a2a6a516352ac8e60851753"><td class="memItemLeft" align="right" valign="top"><a id="a5fa3ef492a2a6a516352ac8e60851753"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>Add</b> (const VectorXd &amp;x, double target)</td></tr>
+<tr class="separator:a5fa3ef492a2a6a516352ac8e60851753"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d9f97258985e244d555f059f5e4c9cb"><td class="memItemLeft" align="right" valign="top"><a id="a8d9f97258985e244d555f059f5e4c9cb"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>Add</b> (const std::vector&lt; VectorXd &gt; &amp;points, const VectorXd &amp;targets)</td></tr>
+<tr class="separator:a8d9f97258985e244d555f059f5e4c9cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83cc63842baab58995363b12e08cdd8a"><td class="memItemLeft" align="right" valign="top"><a id="a83cc63842baab58995363b12e08cdd8a"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>UpdateTargets</b> (const std::vector&lt; VectorXd &gt; &amp;points, const std::vector&lt; double &gt; &amp;targets, double step_size, bool finalize=true)</td></tr>
+<tr class="separator:a83cc63842baab58995363b12e08cdd8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ad3e9ac5a536ed71be83fac8ca4f0af"><td class="memItemLeft" align="right" valign="top"><a id="a8ad3e9ac5a536ed71be83fac8ca4f0af"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>LearnHyperparams</b> ()</td></tr>
 <tr class="separator:a8ad3e9ac5a536ed71be83fac8ca4f0af"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -97,6 +106,12 @@ const MatrixXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>Immut
 <tr class="memitem:ac80689ba379920754defa7e585cf20bf"><td class="memItemLeft" align="right" valign="top"><a id="ac80689ba379920754defa7e585cf20bf"></a>
 const VectorXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>ImmutableRegressedTargets</b> () const</td></tr>
 <tr class="separator:ac80689ba379920754defa7e585cf20bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6661f9b790c68623d9b33f55c36d3a57"><td class="memItemLeft" align="right" valign="top"><a id="a6661f9b790c68623d9b33f55c36d3a57"></a>
+const VectorXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>ImmutableTargets</b> () const</td></tr>
+<tr class="separator:a6661f9b790c68623d9b33f55c36d3a57"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a012f521ef15c82cdcf07dc6d732e2322"><td class="memItemLeft" align="right" valign="top"><a id="a012f521ef15c82cdcf07dc6d732e2322"></a>
+const ConstPointSet&#160;</td><td class="memItemRight" valign="bottom"><b>ImmutablePoints</b> () const</td></tr>
+<tr class="separator:a012f521ef15c82cdcf07dc6d732e2322"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a281b5c08bb7a012203a49d992098e0c3"><td class="memItemLeft" align="right" valign="top"><a id="a281b5c08bb7a012203a49d992098e0c3"></a>
 const Eigen::LLT&lt; MatrixXd &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>ImmutableCholesky</b> () const</td></tr>
 <tr class="separator:a281b5c08bb7a012203a49d992098e0c3"><td class="memSeparator" colspan="2">&#160;</td></tr>

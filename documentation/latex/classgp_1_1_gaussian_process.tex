@@ -18,6 +18,15 @@ void {\bfseries Evaluate} (const Vector\+Xd \&x, double \&mean, double \&varianc
 \hypertarget{classgp_1_1_gaussian_process_a2594af50120c38f7c3d4dd894fb07d32}{}\label{classgp_1_1_gaussian_process_a2594af50120c38f7c3d4dd894fb07d32} 
 void {\bfseries Evaluate\+Training\+Point} (size\+\_\+t ii, double \&mean, double \&variance) const
 \item 
+\hypertarget{classgp_1_1_gaussian_process_a5fa3ef492a2a6a516352ac8e60851753}{}\label{classgp_1_1_gaussian_process_a5fa3ef492a2a6a516352ac8e60851753} 
+bool {\bfseries Add} (const Vector\+Xd \&x, double target)
+\item 
+\hypertarget{classgp_1_1_gaussian_process_a8d9f97258985e244d555f059f5e4c9cb}{}\label{classgp_1_1_gaussian_process_a8d9f97258985e244d555f059f5e4c9cb} 
+bool {\bfseries Add} (const std\+::vector$<$ Vector\+Xd $>$ \&points, const Vector\+Xd \&targets)
+\item 
+\hypertarget{classgp_1_1_gaussian_process_a83cc63842baab58995363b12e08cdd8a}{}\label{classgp_1_1_gaussian_process_a83cc63842baab58995363b12e08cdd8a} 
+double {\bfseries Update\+Targets} (const std\+::vector$<$ Vector\+Xd $>$ \&points, const std\+::vector$<$ double $>$ \&targets, double step\+\_\+size, bool finalize=true)
+\item 
 \hypertarget{classgp_1_1_gaussian_process_a8ad3e9ac5a536ed71be83fac8ca4f0af}{}\label{classgp_1_1_gaussian_process_a8ad3e9ac5a536ed71be83fac8ca4f0af} 
 bool {\bfseries Learn\+Hyperparams} ()
 \item 
@@ -26,6 +35,12 @@ const Matrix\+Xd \& {\bfseries Immutable\+Covariance} () const
 \item 
 \hypertarget{classgp_1_1_gaussian_process_ac80689ba379920754defa7e585cf20bf}{}\label{classgp_1_1_gaussian_process_ac80689ba379920754defa7e585cf20bf} 
 const Vector\+Xd \& {\bfseries Immutable\+Regressed\+Targets} () const
+\item 
+\hypertarget{classgp_1_1_gaussian_process_a6661f9b790c68623d9b33f55c36d3a57}{}\label{classgp_1_1_gaussian_process_a6661f9b790c68623d9b33f55c36d3a57} 
+const Vector\+Xd \& {\bfseries Immutable\+Targets} () const
+\item 
+\hypertarget{classgp_1_1_gaussian_process_a012f521ef15c82cdcf07dc6d732e2322}{}\label{classgp_1_1_gaussian_process_a012f521ef15c82cdcf07dc6d732e2322} 
+const Const\+Point\+Set {\bfseries Immutable\+Points} () const
 \item 
 \hypertarget{classgp_1_1_gaussian_process_a281b5c08bb7a012203a49d992098e0c3}{}\label{classgp_1_1_gaussian_process_a281b5c08bb7a012203a49d992098e0c3} 
 const Eigen\+::\+L\+LT$<$ Matrix\+Xd $>$ \& {\bfseries Immutable\+Cholesky} () const
